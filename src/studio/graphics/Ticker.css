@@ -1,0 +1,181 @@
+.ticker-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  background: var(--bg-color, rgba(0, 0, 0, 0.9));
+  color: var(--text-color, #ffffff);
+  font-size: var(--font-size, 14px);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  border-top: 2px solid #ff0000;
+  user-select: none;
+  pointer-events: none;
+  overflow: hidden;
+  
+  /* Default styling */
+  --bg-color: rgba(0, 0, 0, 0.9);
+  --text-color: #ffffff;
+  --font-size: 14px;
+  --scroll-speed: 50s;
+  --animation-duration: 30s;
+}
+
+.ticker-label {
+  flex-shrink: 0;
+  background: #ff0000;
+  color: #ffffff;
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  position: relative;
+}
+
+.ticker-label::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 16px solid #ff0000;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.ticker-content {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 20px;
+}
+
+.ticker-text {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  line-height: 1;
+  will-change: transform;
+}
+
+.ticker-text span {
+  display: inline-block;
+  padding-right: 2em;
+}
+
+/* Scrolling animation */
+@keyframes tickerScroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Pause animation on hover for better readability */
+.ticker-container:hover .ticker-text {
+  animation-play-state: paused !important;
+}
+
+/* Alternative ticker styles */
+.ticker-container.style-sports {
+  border-top: 2px solid #00ff00;
+}
+
+.ticker-container.style-sports .ticker-label {
+  background: #00ff00;
+  color: #000000;
+}
+
+.ticker-container.style-sports .ticker-label::after {
+  border-left-color: #00ff00;
+}
+
+.ticker-container.style-business {
+  border-top: 2px solid #0066cc;
+}
+
+.ticker-container.style-business .ticker-label {
+  background: #0066cc;
+}
+
+.ticker-container.style-business .ticker-label::after {
+  border-left-color: #0066cc;
+}
+
+.ticker-container.style-tech {
+  border-top: 2px solid #9b59b6;
+}
+
+.ticker-container.style-tech .ticker-label {
+  background: #9b59b6;
+}
+
+.ticker-container.style-tech .ticker-label::after {
+  border-left-color: #9b59b6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ticker-container {
+    height: 35px;
+    font-size: 12px;
+  }
+  
+  .ticker-label {
+    padding: 0 12px;
+    font-size: 0.7em;
+  }
+  
+  .ticker-label::after {
+    border-left-width: 12px;
+    border-top-width: 17.5px;
+    border-bottom-width: 17.5px;
+  }
+  
+  .ticker-content {
+    padding-left: 16px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .ticker-container {
+    border-top-width: 3px;
+  }
+  
+  .ticker-label {
+    font-weight: 900;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-text {
+    animation: none !important;
+  }
+  
+  .ticker-content {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .ticker-content::-webkit-scrollbar {
+    display: none;
+  }
+}
