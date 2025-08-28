@@ -4,11 +4,12 @@ import { LowerThirdControls } from './panels/LowerThirdControls';
 import { TickerControls } from './panels/TickerControls';
 import { OverlayControls } from './panels/OverlayControls';
 import { PresetControls } from './panels/PresetControls';
+import { StorageControls } from './panels/StorageControls';
 import { useKeyboardShortcuts, KeyboardShortcutsHelp } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
 import './ControlPanel.css';
 
-type TabType = 'background' | 'lower-third' | 'ticker' | 'overlays' | 'presets';
+type TabType = 'background' | 'lower-third' | 'ticker' | 'overlays' | 'presets' | 'storage';
 
 interface Tab {
   id: TabType;
@@ -21,7 +22,8 @@ const tabs: Tab[] = [
   { id: 'lower-third', label: 'Lower Third', icon: '📰' },
   { id: 'ticker', label: 'Ticker', icon: '📊' },
   { id: 'overlays', label: 'Overlays', icon: '⏰' },
-  { id: 'presets', label: 'Presets', icon: '💾' }
+  { id: 'presets', label: 'Presets', icon: '💾' },
+  { id: 'storage', label: 'Storage', icon: '🗄️' }
 ];
 
 export const ControlPanel: React.FC = () => {
@@ -42,6 +44,8 @@ export const ControlPanel: React.FC = () => {
         return <OverlayControls />;
       case 'presets':
         return <PresetControls />;
+      case 'storage':
+        return <StorageControls />;
       default:
         return <BackgroundControls />;
     }

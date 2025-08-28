@@ -105,7 +105,12 @@ export const TickerControls: React.FC = () => {
               />
               <button
                 className="control-button primary"
-                style={{ whiteSpace: 'nowrap' }}
+                style={{ 
+                  whiteSpace: 'nowrap',
+                  minWidth: '60px',
+                  width: '60px',
+                  padding: '10px 8px'
+                }}
                 onClick={addTickerItem}
                 disabled={!newTickerItem.trim()}
               >

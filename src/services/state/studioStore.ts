@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { localStorageService } from '@services/storage/localStorage';
 import type { 
   StudioBackground, 
   LowerThird, 
@@ -96,21 +97,46 @@ const defaultLiveIndicator: LiveIndicator = {
   position: { x: 20, y: 60 }
 };
 
+// Load initial state from localStorage or use defaults
+const getInitialState = () => {
+  const savedState = localStorageService.loadState();
+  
+  if (savedState) {
+    return {
+      background: savedState.background || defaultBackground,
+      lowerThird: savedState.lowerThird || null,
+      ticker: savedState.ticker || null,
+      clock: savedState.clock || defaultClock,
+      liveIndicator: savedState.liveIndicator || defaultLiveIndicator,
+      presets: savedState.presets || [],
+      activePresetId: savedState.activePresetId || null,
+      controlPanelOpen: true, // UI state - don't persist
+      previewMode: true, // UI state - don't persist
+      targetFPS: savedState.targetFPS || 60,
+      quality: savedState.quality || 'high',
+    };
+  }
+  
+  return {
+    background: defaultBackground,
+    lowerThird: null,
+    ticker: null,
+    clock: defaultClock,
+    liveIndicator: defaultLiveIndicator,
+    presets: [],
+    activePresetId: null,
+    controlPanelOpen: true,
+    previewMode: true,
+    targetFPS: 60,
+    quality: 'high',
+  };
+};
+
 export const useStudioStore = create<StudioState>()(
   subscribeWithSelector(
     immer((set, get) => ({
-      // Initial state
-      background: defaultBackground,
-      lowerThird: null,
-      ticker: null,
-      clock: defaultClock,
-      liveIndicator: defaultLiveIndicator,
-      presets: [],
-      activePresetId: null,
-      controlPanelOpen: true,
-      previewMode: true,
-      targetFPS: 60,
-      quality: 'high',
+      // Initial state from localStorage or defaults
+      ...getInitialState(),
 
       // Actions
       setBackground: (background) =>
@@ -283,3 +309,21 @@ export const selectQualitySettings = (state: StudioState) => ({
   targetFPS: state.targetFPS,
   quality: state.quality
 });
+
+// Auto-save state to localStorage whenever it changes
+let saveTimeout: NodeJS.Timeout | null = null;
+
+if (localStorageService.isAvailable()) {
+  useStudioStore.subscribe((state) => {
+    // Debounce saves to avoid excessive writes
+    if (saveTimeout) clearTimeout(saveTimeout);
+    
+    saveTimeout = setTimeout(() => {
+      localStorageService.saveState(state);
+    }, 500); // Save 500ms after last change
+  });
+  
+  console.log('💾 Auto-save enabled for Virtual Studio state');
+} else {
+  console.warn('⚠️ localStorage not available, settings will not persist');
+}
