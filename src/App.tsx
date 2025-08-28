@@ -2,19 +2,22 @@ import React, { useEffect, useRef, useState } from 'react';
 import { RenderingEngine } from '@engine/RenderingEngine';
 import { WebGLRenderer } from '@engine/webgl/WebGLRenderer';
 import { GradientBackground } from '@studio/backgrounds/GradientBackground';
+import { ImageBackground } from '@studio/backgrounds/ImageBackground';
 import { CSSGradientBackground } from '@studio/backgrounds/CSSGradientBackground';
+import { CSSImageBackground } from '@studio/backgrounds/CSSImageBackground';
 import { LowerThird } from '@studio/graphics/LowerThird';
 import { Ticker } from '@studio/graphics/Ticker';
 import { ControlPanel } from '@controls/ControlPanel';
 import { useKeyboardShortcuts } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig } from '@types/studio';
+import type { GradientConfig, ImageConfig } from '@types/studio';
 import './App.css';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<RenderingEngine | null>(null);
   const gradientBackgroundRef = useRef<GradientBackground | null>(null);
+  const imageBackgroundRef = useRef<ImageBackground | null>(null);
   const [renderMode, setRenderMode] = useState<'webgl' | 'css' | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -47,14 +50,26 @@ function App() {
         
         if (mode === 'webgl') {
           const webglContext = engine.getWebGLContext();
-          if (webglContext && background.type === 'gradient') {
+          if (webglContext) {
             const scene = webglContext.getScene();
             if (scene) {
-              // Create gradient background
-              gradientBackgroundRef.current = new GradientBackground(background.config as GradientConfig);
-              const mesh = gradientBackgroundRef.current.create();
-              scene.add(mesh);
-              console.log('WebGL gradient background added to scene', mesh);
+              if (background.type === 'gradient') {
+                // Create gradient background
+                gradientBackgroundRef.current = new GradientBackground(background.config as GradientConfig);
+                const mesh = gradientBackgroundRef.current.create();
+                scene.add(mesh);
+                console.log('WebGL gradient background added to scene', mesh);
+              } else if (background.type === 'image') {
+                // Create image background
+                imageBackgroundRef.current = new ImageBackground(background.config as ImageConfig);
+                try {
+                  const mesh = await imageBackgroundRef.current.create();
+                  scene.add(mesh);
+                  console.log('WebGL image background added to scene', mesh);
+                } catch (error) {
+                  console.error('Failed to create image background:', error);
+                }
+              }
             }
           }
           setRenderMode('webgl');
@@ -67,6 +82,9 @@ function App() {
         engine.onRender((deltaTime) => {
           if (gradientBackgroundRef.current) {
             gradientBackgroundRef.current.update(deltaTime);
+          }
+          if (imageBackgroundRef.current) {
+            imageBackgroundRef.current.update(deltaTime);
           }
         });
 
@@ -89,20 +107,76 @@ function App() {
         gradientBackgroundRef.current.dispose();
         gradientBackgroundRef.current = null;
       }
+      if (imageBackgroundRef.current) {
+        imageBackgroundRef.current.dispose();
+        imageBackgroundRef.current = null;
+      }
     };
   }, []);
 
-  // Update gradient when config changes
+  // Update background when config changes
   useEffect(() => {
     if (gradientBackgroundRef.current && background.type === 'gradient') {
       gradientBackgroundRef.current.updateConfig(background.config as GradientConfig);
+    } else if (imageBackgroundRef.current && background.type === 'image') {
+      imageBackgroundRef.current.updateConfig(background.config as ImageConfig);
     }
   }, [background.config]);
+
+  // Handle background type changes
+  useEffect(() => {
+    const switchBackgroundType = async () => {
+      if (!engineRef.current) return;
+      
+      const webglContext = engineRef.current.getWebGLContext();
+      if (!webglContext) return;
+      
+      const scene = webglContext.getScene();
+      if (!scene) return;
+
+      // Clean up existing backgrounds
+      if (gradientBackgroundRef.current) {
+        const mesh = gradientBackgroundRef.current.getMesh();
+        if (mesh) scene.remove(mesh);
+        gradientBackgroundRef.current.dispose();
+        gradientBackgroundRef.current = null;
+      }
+      
+      if (imageBackgroundRef.current) {
+        const mesh = imageBackgroundRef.current.getMesh();
+        if (mesh) scene.remove(mesh);
+        imageBackgroundRef.current.dispose();
+        imageBackgroundRef.current = null;
+      }
+
+      // TEMP DEBUG: Force clear all children from scene to reset WebGL state
+      console.log('Scene children before clear:', scene.children.length);
+      const childrenToRemove = [...scene.children];
+      childrenToRemove.forEach(child => scene.remove(child));
+      console.log('Scene children after clear:', scene.children.length);
+
+      // Create new background based on type
+      if (background.type === 'gradient') {
+        gradientBackgroundRef.current = new GradientBackground(background.config as GradientConfig);
+        const mesh = gradientBackgroundRef.current.create();
+        scene.add(mesh);
+        console.log('Switched to gradient background');
+      } else if (background.type === 'image') {
+        console.log('Using CSS image background instead of WebGL to avoid conflicts');
+        // Skip WebGL image background creation - use CSS instead
+      }
+    };
+
+    switchBackgroundType();
+  }, [background.type]);
 
   // Update background visibility
   useEffect(() => {
     if (gradientBackgroundRef.current) {
       gradientBackgroundRef.current.setVisible(background.visible);
+    }
+    if (imageBackgroundRef.current) {
+      imageBackgroundRef.current.setVisible(background.visible);
     }
   }, [background.visible]);
 
@@ -134,6 +208,11 @@ function App() {
             <CSSGradientBackground config={background.config as GradientConfig} />
           )}
           
+          {/* CSS Image Background - always use CSS for images to avoid WebGL conflicts */}
+          {background.visible && background.type === 'image' && (
+            <CSSImageBackground config={background.config as ImageConfig} visible={background.visible} />
+          )}
+          
           {/* WebGL Canvas */}
           <canvas
             ref={canvasRef}
@@ -141,7 +220,7 @@ function App() {
             width="1920"
             height="1080"
             style={{ 
-              display: renderMode === 'webgl' ? 'block' : 'none',
+              display: renderMode === 'webgl' && background.type !== 'image' ? 'block' : 'none',
               opacity: background.visible ? 1 : 0
             }}
           />

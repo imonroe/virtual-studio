@@ -20,6 +20,9 @@ interface StudioState {
   clock: Clock;
   liveIndicator: LiveIndicator;
   
+  // Last used image config for persistence
+  lastImageConfig: ImageConfig | null;
+  
   // Presets
   presets: StudioPreset[];
   activePresetId: string | null;
@@ -34,6 +37,7 @@ interface StudioState {
   
   // Actions
   setBackground: (background: Partial<StudioBackground>) => void;
+  setLastImageConfig: (config: ImageConfig) => void;
   setLowerThird: (lowerThird: Partial<LowerThird> | null) => void;
   setTicker: (ticker: Partial<Ticker> | null) => void;
   setClock: (clock: Partial<Clock>) => void;
@@ -108,6 +112,7 @@ const getInitialState = () => {
       ticker: savedState.ticker || null,
       clock: savedState.clock || defaultClock,
       liveIndicator: savedState.liveIndicator || defaultLiveIndicator,
+      lastImageConfig: savedState.lastImageConfig || null,
       presets: savedState.presets || [],
       activePresetId: savedState.activePresetId || null,
       controlPanelOpen: true, // UI state - don't persist
@@ -123,6 +128,7 @@ const getInitialState = () => {
     ticker: null,
     clock: defaultClock,
     liveIndicator: defaultLiveIndicator,
+    lastImageConfig: null,
     presets: [],
     activePresetId: null,
     controlPanelOpen: true,
@@ -142,6 +148,10 @@ export const useStudioStore = create<StudioState>()(
       setBackground: (background) =>
         set((state) => {
           Object.assign(state.background, background);
+          // Store image config for persistence
+          if (background.type === 'image' && background.config) {
+            state.lastImageConfig = background.config as ImageConfig;
+          }
         }),
 
       setLowerThird: (lowerThird) =>
@@ -293,6 +303,11 @@ export const useStudioStore = create<StudioState>()(
       toggleLiveIndicator: () =>
         set((state) => {
           state.liveIndicator.visible = !state.liveIndicator.visible;
+        }),
+
+      setLastImageConfig: (config) =>
+        set((state) => {
+          state.lastImageConfig = config;
         })
     }))
   )

@@ -16,12 +16,21 @@ void main() {
 const fragmentShader = `
 uniform vec3 colorA;
 uniform vec3 colorB;
+uniform float time;
+uniform float animationSpeed;
 
 varying vec2 vUv;
 
 void main() {
-  // Simple horizontal gradient
-  vec3 color = mix(colorA, colorB, vUv.x);
+  // Animated gradient with shifting pattern
+  float shift = sin(time * animationSpeed) * 0.5 + 0.5;
+  float t = mix(vUv.x, vUv.y, shift * 0.3);
+  
+  // Add subtle wave animation
+  t += sin(vUv.x * 3.14159 + time * animationSpeed) * 0.05;
+  t = clamp(t, 0.0, 1.0);
+  
+  vec3 color = mix(colorA, colorB, t);
   gl_FragColor = vec4(color, 1.0);
 }
 `;
@@ -48,14 +57,17 @@ export class GradientBackground {
     const colors = this.config.colors.map(this.hexToVec3);
     
     // Try to create shader material, fallback to basic material
-    if (vertexShader && fragmentShader) {
+    // TEMP DEBUG: Force basic material instead of shader to fix WebGL errors
+    if (false && vertexShader && fragmentShader) {
       console.log('Creating shader material with GLSL shaders');
       this.material = new THREE.ShaderMaterial({
         vertexShader,
         fragmentShader,
         uniforms: {
           colorA: { value: colors[0] || new THREE.Vector3(0.1, 0.1, 0.2) },
-          colorB: { value: colors[1] || new THREE.Vector3(0.2, 0.2, 0.4) }
+          colorB: { value: colors[1] || new THREE.Vector3(0.2, 0.2, 0.4) },
+          time: { value: 0.0 },
+          animationSpeed: { value: this.config.animationSpeed || 0.5 }
         },
         side: THREE.DoubleSide,
         transparent: false
@@ -79,10 +91,11 @@ export class GradientBackground {
   update(deltaTime: number): void {
     if (!this.material || !this.config.animated) return;
 
-    // Since we removed the time uniform from the simplified shader,
-    // we'll skip animation updates for now
-    // const currentTime = performance.now() / 1000;
-    // this.material.uniforms.time.value = currentTime - this.startTime;
+    // Update animation uniforms if they exist (shader material only)
+    if (this.material.uniforms && this.material.uniforms.time) {
+      const currentTime = performance.now() / 1000;
+      this.material.uniforms.time.value = currentTime - this.startTime;
+    }
   }
 
   updateConfig(config: Partial<GradientConfig>): void {
@@ -99,7 +112,10 @@ export class GradientBackground {
         }
       }
 
-      // Skip other uniform updates since they don't exist in our simplified shader
+      // Update animation uniforms if they exist
+      if (config.animationSpeed !== undefined && this.material.uniforms.animationSpeed) {
+        this.material.uniforms.animationSpeed.value = config.animationSpeed;
+      }
     }
   }
 

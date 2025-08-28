@@ -255,6 +255,17 @@
   background: #252525;
 }
 
+.control-button.active {
+  background: #646cff;
+  border-color: #646cff;
+  color: #ffffff;
+}
+
+.control-button.active:hover {
+  background: #535bf2;
+  border-color: #535bf2;
+}
+
 .control-button.primary {
   background: #646cff;
   border-color: #646cff;

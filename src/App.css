@@ -15,7 +15,8 @@
   transition: background 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Align to left instead of center */
+  padding-left: 20px; /* Add some padding from the left edge */
 }
 
 .studio-stage {
@@ -29,8 +30,9 @@
   border-radius: 8px;
   
   /* Ensure the stage fits within viewport while maintaining aspect ratio */
-  max-width: calc(100vh * 16/9);
-  max-height: calc(100vw * 9/16);
+  /* Account for control panel width (360px) and padding */
+  max-width: min(calc(100vh * 16/9), calc(100vw - 360px - 40px));
+  max-height: calc(100vh - 40px); /* Account for some vertical padding */
 }
 
 .studio-canvas {

@@ -24,6 +24,7 @@ export const localStorageService = {
           activePresetId: state.activePresetId,
           targetFPS: state.targetFPS,
           quality: state.quality,
+          lastImageConfig: state.lastImageConfig,
         }
       };
       
