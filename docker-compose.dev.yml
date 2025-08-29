@@ -1,0 +1,69 @@
+services:
+  # Virtual Studio development server
+  virtual-studio-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_ENV=development
+    image: virtual-studio:dev
+    container_name: virtual-studio-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # For better file watching in containers
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - ./tsconfig.node.json:/app/tsconfig.node.json
+      - ./eslint.config.js:/app/eslint.config.js
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+  # Code-server for browser-based development  
+  code-server:
+    image: codercom/code-server:latest
+    container_name: virtual-studio-code-server
+    ports:
+      - "8443:8080"  # Code-server web interface
+    environment:
+      - PASSWORD=${CODE_SERVER_PASSWORD:-virtualstudio123}
+      - SUDO_PASSWORD=${CODE_SERVER_PASSWORD:-virtualstudio123}
+      - DEFAULT_WORKSPACE=/workspace
+      # Clean PATH to avoid issues with host system paths containing parentheses
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    volumes:
+      # Mount the project directory
+      - ./:/workspace
+      # Mount SSH directory for git access
+      - ~/.ssh:/home/coder/.ssh:ro
+      # Mount git config
+      - ~/.gitconfig:/home/coder/.gitconfig:ro
+      # Mount Claude Code configuration
+      - ~/.claude:/home/coder/.claude:rw
+      # Map local code-server configuration directories
+      - ./.code-server/data:/home/coder/.local/share/code-server
+      - ./.code-server/data:/home/coder/.vscode-server
+      # Mount a simple startup script
+      - ./docker/setup-code-server.sh:/setup.sh:ro
+    user: "1000:1000"
+    restart: unless-stopped
+    networks:
+      - dev-network
+    depends_on:
+      - virtual-studio-dev
+    command: /bin/bash /setup.sh
+
+networks:
+  dev-network:
+    driver: bridge

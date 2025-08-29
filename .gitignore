@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Code-server configuration (exclude most but keep important settings)
+.code-server/*
+# But include user settings that should be shared
+!.code-server/data/
+.code-server/data/*
+!.code-server/data/User/
+.code-server/data/User/*
+!.code-server/data/User/settings.json
+!.code-server/data/User/keybindings.json
