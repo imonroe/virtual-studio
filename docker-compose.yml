@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  virtual-studio:
+    # Build from local Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Build arguments if needed
+      args:
+        - NODE_ENV=production
+    
+    # Use image name for easier management
+    image: virtual-studio:latest
+    
+    # Container name for easy reference
+    container_name: virtual-studio
+    
+    # Port mapping - expose on port 8080 by default
+    ports:
+      - "8080:80"
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - TZ=UTC
+    
+    # Restart policy for production
+    restart: unless-stopped
+    
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Labels for metadata
+    labels:
+      - "com.virtual-studio.description=Virtual Studio Broadcast Graphics"
+      - "com.virtual-studio.version=0.0.0"
+      - "com.virtual-studio.maintainer=Virtual Studio Team"
+
+  # Optional: Development configuration
+  virtual-studio-dev:
+    profiles:
+      - development
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_ENV=development
+    image: virtual-studio:dev
+    container_name: virtual-studio-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - /app/node_modules
+    restart: unless-stopped
+    command: npm run dev
+
+# Networks (optional, uses default bridge network if not specified)
+networks:
+  default:
+    driver: bridge
+
+# Volumes (if you need persistent data in the future)
+volumes:
+  studio-data:
