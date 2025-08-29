@@ -1,0 +1,35 @@
+{
+    "folders": [
+        {
+            "name": "Virtual Studio",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/.git": false,
+            "**/.DS_Store": true,
+            "**/node_modules": false,
+            ".code-server/data/logs": true,
+            ".code-server/data/User/History": true,
+            ".code-server/data/User/globalStorage": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/build": true,
+            ".code-server/data/logs": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-vscode.vscode-typescript-next",
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "ms-vscode.vscode-json",
+            "slevesque.shader",
+            "raczzalan.webgl-glsl-editor",
+            "eamodio.gitlens"
+        ]
+    }
+}

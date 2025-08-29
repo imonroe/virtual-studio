@@ -1,0 +1,72 @@
+{
+  "recommendations": [
+    // TypeScript & JavaScript
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json",
+    
+    // React & JSX
+    "ms-vscode.vscode-react-refactor",
+    "dsznajder.es7-react-js-snippets",
+    "formulahendry.auto-rename-tag",
+    "bradlc.vscode-tailwindcss",
+    
+    // CSS & Styling
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-css-peek",
+    "zignd.html-css-class-completion",
+    
+    // WebGL & Three.js
+    "slevesque.shader",
+    "raczzalan.webgl-glsl-editor",
+    "dtoplak.vscode-glsllint",
+    
+    // Linting & Formatting
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-eslint-legacy",
+    
+    // Git & Version Control
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+    
+    // Development Tools
+    "ms-vscode.vscode-node-debug2",
+    "ms-vscode.vscode-chrome-debug-core",
+    "ms-vscode.vscode-edge-debug2",
+    "firefox-devtools.vscode-firefox-debug",
+    
+    // Docker
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+    
+    // Productivity
+    "ms-vscode.vscode-todo-highlight",
+    "gruntfuggly.todo-tree",
+    "alefragnani.bookmarks",
+    "ms-vscode.vscode-color-picker",
+    "naumovs.color-highlight",
+    
+    // File Management
+    "ms-vscode.vscode-file-utils",
+    "sleistner.vscode-fileutils",
+    "ms-vscode.vscode-import-cost",
+    "wix.vscode-import-cost",
+    
+    // Performance & Monitoring
+    "ms-vscode.vscode-performance-analyzer",
+    "ms-vscode.vscode-bundle-analyzer",
+    
+    // Markdown (for documentation)
+    "yzhang.markdown-all-in-one",
+    "shd101wyy.markdown-preview-enhanced",
+    
+    // Themes (optional but nice)
+    "zhuangtongfa.material-theme",
+    "ms-vscode.vscode-icons",
+    "pkief.material-icon-theme"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript-tslint-plugin"
+  ]
+}
