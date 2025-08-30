@@ -1,0 +1,237 @@
+.brandingControls {
+  padding: 16px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.controlSection {
+  margin-bottom: 24px;
+}
+
+.controlSection h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Upload Zone */
+.uploadZone {
+  border: 2px dashed #444;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #2a2a2a;
+}
+
+.uploadZone:hover {
+  border-color: #646cff;
+  background: #333;
+}
+
+.uploadZone.uploading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.uploadIcon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.uploadText {
+  color: #fff;
+  font-size: 14px;
+}
+
+.uploadHint {
+  color: #ccc;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.uploadStatus {
+  color: #646cff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Error Message */
+.errorMessage {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 4px;
+  border: 1px solid #dc2626;
+}
+
+/* Logo List */
+.logoList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logoItem {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.logoPreview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.logoThumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logoControls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logoHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logoName {
+  font-size: 12px;
+  color: #fff;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Control Groups */
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.controlGroup label {
+  font-size: 12px;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.controlGroup select,
+.controlGroup input[type="range"],
+.controlGroup input[type="number"] {
+  width: 100%;
+  padding: 6px 8px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.controlGroup select {
+  color: #fff;
+  background-color: #2a2a2a;
+}
+
+.controlGroup select option {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.controlGroup select:focus,
+.controlGroup input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+/* Offset Controls */
+.offsetControls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.offsetInput {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.offsetInput label {
+  min-width: 16px;
+  font-size: 11px;
+  color: #ccc;
+}
+
+.offsetInput input {
+  width: 100%;
+}
+
+/* Remove Button */
+.removeLogoBtn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.removeLogoBtn:hover {
+  background: #b91c1c;
+}
+
+/* Storage Info */
+.storageInfo {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.storageInfo small {
+  color: #ccc;
+  font-size: 11px;
+}
