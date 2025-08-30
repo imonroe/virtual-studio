@@ -34,7 +34,7 @@ export const OverlayControls: React.FC = () => {
               <select
                 className="control-select"
                 value={clock.format}
-                onChange={(e) => setClock({ format: e.target.value as any })}
+                onChange={(e) => setClock({ format: e.target.value as '12h' | '24h' })}
               >
                 <option value="12h">12 Hour (AM/PM)</option>
                 <option value="24h">24 Hour</option>

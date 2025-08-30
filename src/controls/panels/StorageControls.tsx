@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { localStorageService } from '@services/storage/localStorage';
 
 export const StorageControls: React.FC = () => {
-  const [storageInfo, setStorageInfo] = useState<any>(null);
+  const [storageInfo, setStorageInfo] = useState<{ version: string; timestamp: number; lastSaved: string; size: number } | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {

@@ -64,7 +64,7 @@ export class Canvas2DRenderer extends BaseRenderer {
   }
 
   protected renderContent(_ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D): void {
-    // Override in subclasses
+    // Override in subclasses - parameter is required for interface but unused in base class
   }
 
   protected onResize(width: number, height: number): void {

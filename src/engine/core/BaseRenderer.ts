@@ -59,7 +59,7 @@ export abstract class BaseRenderer implements Renderer {
       fps: this.fps,
       frameTime: this.frameTime,
       drawCalls: 0,
-      memory: (performance as any).memory?.usedJSHeapSize
+      memory: (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize
     };
   }
 

@@ -58,7 +58,7 @@ export class GradientBackground {
     
     // Try to create shader material, fallback to basic material
     // TEMP DEBUG: Force basic material instead of shader to fix WebGL errors
-    if (false && vertexShader && fragmentShader) {
+    if (vertexShader && fragmentShader) {
       console.log('Creating shader material with GLSL shaders');
       this.material = new THREE.ShaderMaterial({
         vertexShader,

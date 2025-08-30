@@ -1,12 +1,13 @@
 import React from 'react';
 import { useStudioStore } from '@services/state/studioStore';
+import type { LowerThird, LowerThirdStyle } from '@/types/studio';
 
 export const LowerThirdControls: React.FC = () => {
   const lowerThird = useStudioStore((state) => state.lowerThird);
   const setLowerThird = useStudioStore((state) => state.setLowerThird);
   const toggleLowerThird = useStudioStore((state) => state.toggleLowerThird);
 
-  const updateLowerThird = (updates: any) => {
+  const updateLowerThird = (updates: Partial<LowerThird>) => {
     if (lowerThird) {
       setLowerThird(updates);
     } else {
@@ -14,9 +15,10 @@ export const LowerThirdControls: React.FC = () => {
     }
   };
 
-  const updateStyle = (styleUpdates: any) => {
+  const updateStyle = (styleUpdates: Partial<LowerThirdStyle>) => {
+    const currentStyle = lowerThird?.style || {} as LowerThirdStyle;
     updateLowerThird({
-      style: { ...lowerThird?.style, ...styleUpdates }
+      style: { ...currentStyle, ...styleUpdates }
     });
   };
 
@@ -76,7 +78,7 @@ export const LowerThirdControls: React.FC = () => {
             <select
               className="control-select"
               value={lowerThird.position}
-              onChange={(e) => updateLowerThird({ position: e.target.value })}
+              onChange={(e) => updateLowerThird({ position: e.target.value as 'left' | 'center' | 'right' })}
             >
               <option value="left">Left</option>
               <option value="center">Center</option>
@@ -89,7 +91,7 @@ export const LowerThirdControls: React.FC = () => {
             <select
               className="control-select"
               value={lowerThird.animation}
-              onChange={(e) => updateLowerThird({ animation: e.target.value })}
+              onChange={(e) => updateLowerThird({ animation: e.target.value as 'slide' | 'fade' | 'scale' })}
             >
               <option value="slide">Slide</option>
               <option value="fade">Fade</option>

@@ -35,13 +35,14 @@ export const CSSGradientBackground: React.FC<CSSGradientBackgroundProps> = ({ co
   }, [config]);
 
   useEffect(() => {
-    if (!containerRef.current || !config.animated) return;
+    const element = containerRef.current;
+    if (!element || !config.animated) return;
     
     // Add animation class
-    containerRef.current.classList.add('animated-gradient');
+    element.classList.add('animated-gradient');
     
     return () => {
-      containerRef.current?.classList.remove('animated-gradient');
+      element.classList.remove('animated-gradient');
     };
   }, [config.animated]);
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
+import type { Ticker } from '@/types/studio';
 
 export const TickerControls: React.FC = () => {
   const ticker = useStudioStore((state) => state.ticker);
@@ -7,7 +8,7 @@ export const TickerControls: React.FC = () => {
   const toggleTicker = useStudioStore((state) => state.toggleTicker);
   const [newTickerItem, setNewTickerItem] = useState('');
 
-  const updateTicker = (updates: any) => {
+  const updateTicker = (updates: Partial<Ticker>) => {
     if (ticker) {
       setTicker(updates);
     } else {
