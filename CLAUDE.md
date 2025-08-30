@@ -74,6 +74,7 @@ The `RenderingEngine` class manages renderer selection and fallback logic, prefe
 Zustand store (`studioStore.ts`) manages:
 - Background configuration (gradient/image types)
 - Graphics elements (lower thirds, tickers)
+- Logo/watermark system (branding graphics)
 - Overlays (clock, live indicator)
 - Presets and themes
 - Auto-save to localStorage
@@ -81,6 +82,7 @@ Zustand store (`studioStore.ts`) manages:
 ### Key Features
 - **Procedural Backgrounds**: Gradient and particle effects generated via shaders
 - **Lower Thirds**: Animated text overlays with customizable styling
+- **Logo/Watermark System**: User-uploadable graphics with positioning and sizing controls
 - **Live Graphics**: Clock display, live indicator, ticker tape
 - **Keyboard Shortcuts**: Quick toggles for visibility and presets
 - **OBS Integration**: Optimized for browser source capture
@@ -187,3 +189,46 @@ For comprehensive runtime verification without browser automation:
 5. **CSS verification**: Confirm styles load and follow design system
 
 **Result**: Reduced from 27 linting problems (22 errors, 5 warnings) to 8 problems (6 errors, 2 warnings) - 70% improvement.
+
+## Feature Implementation Lessons
+
+### Logo/Watermark System Implementation (August 30, 2025)
+
+**Key Lessons Learned:**
+
+#### Store Architecture Patterns
+- **Follow existing patterns**: The codebase uses direct state properties, not nested config objects
+- **Wrong approach**: `state.config.branding.logos` (creates duplicate properties)
+- **Correct approach**: `state.logos: LogoConfig[]` (matches existing pattern)
+- **State integration**: New features should extend the existing Zustand store structure, not create separate sub-stores
+
+#### CSS Variable Usage
+- **Critical issue**: CSS variables like `var(--text-primary)` don't exist in this project
+- **Symptom**: White-on-white text in dropdowns due to undefined variables
+- **Solution**: Examine existing CSS files (e.g., `ControlPanel.css`) to understand the actual color scheme
+- **Color mappings discovered**:
+  - Text primary: `#fff`
+  - Text secondary: `#ccc`  
+  - Background primary: `#2a2a2a`
+  - Background secondary: `#2a2a2a`
+  - Border color: `#444`
+  - Accent color: `#646cff`
+  - Error color: `#dc2626`
+
+#### File Structure Best Practices
+- **Service organization**: Create dedicated service folders (e.g., `/src/services/branding/`)
+- **Type definitions**: Centralize new types in `/src/types/` with descriptive filenames
+- **Component structure**: Place graphics components in `/src/studio/graphics/`
+- **Control panels**: Use CSS Modules pattern for styling (`.module.css` files)
+
+#### Image Processing Implementation
+- **LocalStorage storage**: Use base64 data URLs for consistency with existing background images
+- **File validation**: Implement comprehensive validation (file size, type, dimensions)
+- **Error handling**: Provide clear user feedback for upload failures
+- **Memory management**: Consider compression for large images to avoid localStorage limits
+
+#### Development Workflow
+- **Build verification**: Always run `npm run build` after major changes
+- **Incremental testing**: Fix one component at a time, test after each fix
+- **CSS debugging**: Use browser dev tools to verify variable resolution
+- **State debugging**: Use Zustand devtools for state management verification

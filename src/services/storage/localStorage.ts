@@ -1,4 +1,4 @@
-import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, StudioPreset, ImageConfig } from '@/types/studio';
+import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, StudioPreset, ImageConfig, LogoConfig } from '@/types/studio';
 
 const STORAGE_KEY = 'virtual-studio-state';
 const STORAGE_VERSION = '1.0';
@@ -9,6 +9,7 @@ export interface SavedStudioState {
   ticker: Ticker | null;
   clock: Clock;
   liveIndicator: LiveIndicator;
+  logos: LogoConfig[];
   presets: StudioPreset[];
   activePresetId: string | null;
   targetFPS: 60 | 30;
@@ -24,7 +25,7 @@ export interface StorageState {
 
 export const localStorageService = {
   // Save state to localStorage
-  saveState: (state: { background: StudioBackground; lowerThird: LowerThird | null; ticker: Ticker | null; clock: Clock; liveIndicator: LiveIndicator; presets: StudioPreset[]; activePresetId: string | null; targetFPS: 60 | 30; quality: 'low' | 'medium' | 'high'; lastImageConfig: ImageConfig | null }): void => {
+  saveState: (state: { background: StudioBackground; lowerThird: LowerThird | null; ticker: Ticker | null; clock: Clock; liveIndicator: LiveIndicator; logos: LogoConfig[]; presets: StudioPreset[]; activePresetId: string | null; targetFPS: 60 | 30; quality: 'low' | 'medium' | 'high'; lastImageConfig: ImageConfig | null }): void => {
     try {
       const storageState: StorageState = {
         version: STORAGE_VERSION,
@@ -35,6 +36,7 @@ export const localStorageService = {
           ticker: state.ticker,
           clock: state.clock,
           liveIndicator: state.liveIndicator,
+          logos: state.logos,
           presets: state.presets,
           activePresetId: state.activePresetId,
           targetFPS: state.targetFPS,

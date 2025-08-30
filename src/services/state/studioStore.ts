@@ -10,8 +10,11 @@ import type {
   LiveIndicator,
   StudioPreset,
   GradientConfig,
-  ImageConfig
+  ImageConfig,
+  LogoConfig,
+  LogoPosition
 } from '@/types/studio';
+import { logoService } from '@services/branding/logoService';
 
 interface StudioState {
   // Current active elements
@@ -20,6 +23,9 @@ interface StudioState {
   ticker: Ticker | null;
   clock: Clock;
   liveIndicator: LiveIndicator;
+  
+  // Branding/Logo system
+  logos: LogoConfig[];
   
   // Last used image config for persistence
   lastImageConfig: ImageConfig | null;
@@ -57,6 +63,12 @@ interface StudioState {
   setTargetFPS: (fps: 60 | 30) => void;
   setQuality: (quality: 'low' | 'medium' | 'high') => void;
   
+  // Logo/Branding actions
+  addLogo: (file: File, position?: LogoPosition) => Promise<void>;
+  updateLogo: (logoId: string, updates: Partial<LogoConfig>) => void;
+  removeLogo: (logoId: string) => void;
+  toggleLogo: (logoId: string) => void;
+
   // Quick actions
   toggleBackground: () => void;
   toggleLowerThird: () => void;
@@ -102,6 +114,7 @@ const defaultLiveIndicator: LiveIndicator = {
   position: { x: 20, y: 60 }
 };
 
+
 // Load initial state from localStorage or use defaults
 const getInitialState = () => {
   const savedState = localStorageService.loadState();
@@ -113,6 +126,7 @@ const getInitialState = () => {
       ticker: savedState.ticker || null,
       clock: savedState.clock || defaultClock,
       liveIndicator: savedState.liveIndicator || defaultLiveIndicator,
+      logos: savedState.logos || [],
       lastImageConfig: savedState.lastImageConfig || null,
       presets: savedState.presets || [],
       activePresetId: savedState.activePresetId || null,
@@ -129,6 +143,7 @@ const getInitialState = () => {
     ticker: null,
     clock: defaultClock,
     liveIndicator: defaultLiveIndicator,
+    logos: [],
     lastImageConfig: null,
     presets: [],
     activePresetId: null,
@@ -211,6 +226,63 @@ export const useStudioStore = create<StudioState>()(
       setLiveIndicator: (indicator) =>
         set((state) => {
           Object.assign(state.liveIndicator, indicator);
+        }),
+
+      // Logo/Branding actions
+      addLogo: async (file, position = 'bottom-right') => {
+        try {
+          const validation = logoService.validateFile(file);
+          if (!validation.valid) {
+            throw new Error(validation.errors.join(', '));
+          }
+
+          const processed = await logoService.processImage(file);
+          const logoId = logoService.generateLogoId();
+
+          const newLogo: LogoConfig = {
+            id: logoId,
+            visible: true,
+            name: processed.fileName,
+            imageUrl: processed.dataUrl,
+            fileName: processed.fileName,
+            position,
+            size: 150,
+            opacity: 1,
+            offset: { x: 20, y: 20 },
+            uploadTimestamp: Date.now()
+          };
+
+          set((state) => {
+            state.logos.push(newLogo);
+          });
+        } catch (error) {
+          console.error('Failed to add logo:', error);
+          throw error;
+        }
+      },
+
+      updateLogo: (logoId, updates) =>
+        set((state) => {
+          const logo = state.logos.find(l => l.id === logoId);
+          if (logo) {
+            Object.assign(logo, updates);
+          }
+        }),
+
+      removeLogo: (logoId) =>
+        set((state) => {
+          const index = state.logos.findIndex(l => l.id === logoId);
+          if (index !== -1) {
+            state.logos.splice(index, 1);
+          }
+        }),
+
+      toggleLogo: (logoId) =>
+        set((state) => {
+          const logo = state.logos.find(l => l.id === logoId);
+          if (logo) {
+            logo.visible = !logo.visible;
+          }
         }),
 
       savePreset: (name) => {
@@ -313,7 +385,7 @@ export const useStudioStore = create<StudioState>()(
       setLastImageConfig: (config) =>
         set((state) => {
           state.lastImageConfig = config;
-        })
+        }),
     }))
   )
 );

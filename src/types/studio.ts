@@ -81,6 +81,12 @@ export interface LiveIndicator {
   position: { x: number; y: number };
 }
 
+// Re-export branding types for consistency
+export type { LogoPosition, LogoConfig, BrandingState } from './branding';
+
+// Import for direct use
+import type { BrandingState } from './branding';
+
 export interface StudioPreset {
   id: string;
   name: string;
@@ -89,4 +95,5 @@ export interface StudioPreset {
   ticker?: Ticker;
   clock?: Clock;
   liveIndicator?: LiveIndicator;
+  branding?: BrandingState;
 }

@@ -6,6 +6,7 @@ import { CSSGradientBackground } from '@studio/backgrounds/CSSGradientBackground
 import { CSSImageBackground } from '@studio/backgrounds/CSSImageBackground';
 import { LowerThird } from '@studio/graphics/LowerThird';
 import { Ticker } from '@studio/graphics/Ticker';
+import { Logo } from '@studio/graphics/Logo';
 import { ControlPanel } from '@controls/ControlPanel';
 import { useKeyboardShortcuts } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
@@ -25,6 +26,7 @@ function App() {
   const liveIndicator = useStudioStore((state) => state.liveIndicator);
   const lowerThird = useStudioStore((state) => state.lowerThird);
   const ticker = useStudioStore((state) => state.ticker);
+  const logos = useStudioStore((state) => state.logos);
 
   // Initialize keyboard shortcuts
   useKeyboardShortcuts();
@@ -260,6 +262,11 @@ function App() {
 
             {/* Ticker */}
             {ticker && <Ticker config={ticker} />}
+
+            {/* Logos/Watermarks */}
+            {logos.map((logo) => (
+              <Logo key={logo.id} config={logo} />
+            ))}
           </div>
         </div>
       </div>
