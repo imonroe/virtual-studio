@@ -120,7 +120,7 @@ function App() {
     } else if (imageBackgroundRef.current && background.type === 'image') {
       imageBackgroundRef.current.updateConfig(background.config as ImageConfig);
     }
-  }, [background.config]);
+  }, [background.config, background.type]);
 
   // Handle background type changes
   useEffect(() => {

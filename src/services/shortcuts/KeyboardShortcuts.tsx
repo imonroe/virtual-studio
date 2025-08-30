@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
 
 interface KeyboardShortcut {
@@ -10,7 +10,7 @@ interface KeyboardShortcut {
   description: string;
 }
 
-export const useKeyboardShortcuts = () => {
+const useKeyboardShortcuts = () => {
   const toggleBackground = useStudioStore((state) => state.toggleBackground);
   const toggleClock = useStudioStore((state) => state.toggleClock);
   const toggleLiveIndicator = useStudioStore((state) => state.toggleLiveIndicator);
@@ -24,7 +24,7 @@ export const useKeyboardShortcuts = () => {
   const ticker = useStudioStore((state) => state.ticker);
   const previewMode = useStudioStore((state) => state.previewMode);
 
-  const shortcuts: KeyboardShortcut[] = [
+  const shortcuts: KeyboardShortcut[] = useMemo(() => [
     {
       key: '0',
       action: toggleBackground,
@@ -91,7 +91,20 @@ export const useKeyboardShortcuts = () => {
       },
       description: 'Hide All Overlays'
     }
-  ];
+  ], [
+    toggleBackground,
+    toggleClock,
+    toggleLiveIndicator,
+    toggleLowerThird,
+    toggleTicker,
+    toggleControlPanel,
+    setPreviewMode,
+    setLowerThird,
+    setTicker,
+    lowerThird,
+    ticker,
+    previewMode
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -128,6 +141,8 @@ export const useKeyboardShortcuts = () => {
 
   return { shortcuts };
 };
+
+export { useKeyboardShortcuts };
 
 // Keyboard shortcuts help component
 export const KeyboardShortcutsHelp: React.FC<{ shortcuts: KeyboardShortcut[] }> = ({ shortcuts }) => {

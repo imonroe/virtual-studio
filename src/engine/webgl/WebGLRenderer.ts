@@ -118,7 +118,7 @@ export class WebGLRenderer extends BaseRenderer {
         window.WebGLRenderingContext && 
         (canvas.getContext('webgl2') || canvas.getContext('webgl'))
       );
-    } catch (e) {
+    } catch {
       return false;
     }
   }

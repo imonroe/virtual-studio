@@ -188,7 +188,7 @@ export const PresetControls: React.FC = () => {
                       // Here you would implement the import logic
                       console.log('Imported presets:', importedPresets);
                       alert('Import feature coming soon!');
-                    } catch (error) {
+                    } catch {
                       alert('Invalid preset file');
                     }
                   };

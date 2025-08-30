@@ -195,7 +195,7 @@ export const BackgroundControls: React.FC = () => {
             <select
               className="control-select"
               value={gradientConfig?.type || 'linear'}
-              onChange={(e) => updateGradientConfig({ type: e.target.value as any })}
+              onChange={(e) => updateGradientConfig({ type: e.target.value as 'linear' | 'radial' | 'conic' })}
             >
               <option value="linear">Linear</option>
               <option value="radial">Radial</option>

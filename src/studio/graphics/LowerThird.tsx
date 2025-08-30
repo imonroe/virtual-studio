@@ -12,7 +12,7 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ config }) => {
   const [animationClass, setAnimationClass] = useState('');
 
   useEffect(() => {
-    let enterTimer: NodeJS.Timeout;
+    let enterTimer: NodeJS.Timeout | undefined;
     
     if (!config.visible) {
       setAnimationClass('lower-third-exit');

@@ -44,7 +44,7 @@ export const CSSImageBackground: React.FC<CSSImageBackgroundProps> = ({ config, 
         style={{
           width: '100%',
           height: '100%',
-          objectFit: getObjectFit() as any,
+          objectFit: getObjectFit() as React.CSSProperties['objectFit'],
           objectPosition: getObjectPosition(),
           display: 'block'
         }}

@@ -118,8 +118,8 @@ const getInitialState = () => {
       activePresetId: savedState.activePresetId || null,
       controlPanelOpen: true, // UI state - don't persist
       previewMode: true, // UI state - don't persist
-      targetFPS: savedState.targetFPS || 60,
-      quality: savedState.quality || 'high',
+      targetFPS: (savedState.targetFPS as 60 | 30) || 60,
+      quality: (savedState.quality as 'low' | 'medium' | 'high') || 'high',
     };
   }
   
@@ -134,8 +134,8 @@ const getInitialState = () => {
     activePresetId: null,
     controlPanelOpen: true,
     previewMode: true,
-    targetFPS: 60,
-    quality: 'high',
+    targetFPS: 60 as const,
+    quality: 'high' as const,
   };
 };
 
