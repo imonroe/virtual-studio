@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { Ticker as TickerType } from '@types/studio';
+import type { Ticker as TickerType } from '@/types/studio';
 import './Ticker.css';
 
 interface TickerProps {

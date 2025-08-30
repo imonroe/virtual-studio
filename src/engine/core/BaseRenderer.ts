@@ -1,4 +1,4 @@
-import type { Renderer, RenderMode, RenderStats, Size } from '@types/rendering';
+import type { Renderer, RenderMode, RenderStats, Size } from '@/types/rendering';
 
 export abstract class BaseRenderer implements Renderer {
   protected canvas: HTMLCanvasElement | null = null;

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ImageConfig } from '@types/studio';
+import type { ImageConfig } from '@/types/studio';
 
 interface CSSImageBackgroundProps {
   config: ImageConfig;

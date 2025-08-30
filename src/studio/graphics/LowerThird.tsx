@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { LowerThird as LowerThirdType } from '@types/studio';
+import type { LowerThird as LowerThirdType } from '@/types/studio';
 import './LowerThird.css';
 
 interface LowerThirdProps {
@@ -7,7 +7,7 @@ interface LowerThirdProps {
   isAnimating?: boolean;
 }
 
-export const LowerThird: React.FC<LowerThirdProps> = ({ config, isAnimating = false }) => {
+export const LowerThird: React.FC<LowerThirdProps> = ({ config }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [animationClass, setAnimationClass] = useState('');
 

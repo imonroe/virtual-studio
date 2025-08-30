@@ -209,7 +209,7 @@ export const PresetControls: React.FC = () => {
           <button
             className="control-button"
             onClick={() => {
-              const presetId = savePreset('News Studio');
+              savePreset('News Studio');
               // You could also programmatically set up a news-style configuration here
             }}
           >
@@ -218,7 +218,7 @@ export const PresetControls: React.FC = () => {
           <button
             className="control-button"
             onClick={() => {
-              const presetId = savePreset('Gaming Stream');
+              savePreset('Gaming Stream');
               // You could also programmatically set up a gaming-style configuration here
             }}
           >
@@ -227,7 +227,7 @@ export const PresetControls: React.FC = () => {
           <button
             className="control-button"
             onClick={() => {
-              const presetId = savePreset('Corporate Meeting');
+              savePreset('Corporate Meeting');
               // You could also programmatically set up a corporate-style configuration here
             }}
           >

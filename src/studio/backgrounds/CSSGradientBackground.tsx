@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
-import type { GradientConfig } from '@types/studio';
+import type { GradientConfig } from '@/types/studio';
 import './CSSGradientBackground.css';
 
 interface CSSGradientBackgroundProps {

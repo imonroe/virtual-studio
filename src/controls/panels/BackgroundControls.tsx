@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig, ImageConfig } from '@types/studio';
+import type { GradientConfig, ImageConfig } from '@/types/studio';
 
 export const BackgroundControls: React.FC = () => {
   const background = useStudioStore((state) => state.background);

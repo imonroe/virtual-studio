@@ -60,6 +60,42 @@ This guide provides comprehensive information for developers who want to contrib
    - Check browser console for any errors
    - Verify WebGL is working (check for gradient backgrounds)
 
+### Troubleshooting Setup Issues
+
+If you encounter build errors during setup:
+
+#### TypeScript Compilation Errors
+```bash
+# Common error: "Cannot import type declaration files"
+# Solution: Ensure you're using correct import paths
+# ❌ Wrong: import type { Config } from '@types/studio'
+# ✅ Correct: import type { Config } from '@/types/studio'
+```
+
+#### Missing Dependencies
+```bash
+# If build fails with missing dependencies:
+npm install --save-dev @types/node terser
+
+# For development server issues:
+npm run dev -- --host
+```
+
+#### Port Connection Issues
+If `localhost:3000` refuses connection:
+- Check if another process is using port 3000
+- Try the network IP address shown in terminal output
+- For WSL2: Access from Windows browser using `localhost:3000`
+
+#### Clean Installation
+If problems persist, try a fresh install:
+```bash
+rm -rf node_modules package-lock.json
+npm install
+npm run build  # Verify build works
+npm run dev    # Start development
+```
+
 ## Project Architecture
 
 ### Core Technologies

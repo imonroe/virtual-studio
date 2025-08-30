@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { ImageConfig } from '@types/studio';
+import type { ImageConfig } from '@/types/studio';
 
 export class ImageBackground {
   private mesh: THREE.Mesh | null = null;
@@ -32,7 +32,7 @@ export class ImageBackground {
       return;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const loader = new THREE.TextureLoader();
       loader.load(
         this.config.url,
@@ -128,7 +128,7 @@ export class ImageBackground {
     }
   }
 
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     // Static images don't need updates
     // Future: Could add subtle animations like ken burns effect
   }

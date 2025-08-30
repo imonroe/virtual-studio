@@ -79,7 +79,7 @@ export class ParticleSystem {
     return this.mesh;
   }
 
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     if (!this.material) return;
 
     const currentTime = performance.now() / 1000;

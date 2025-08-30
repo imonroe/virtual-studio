@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RenderingEngine } from '@engine/RenderingEngine';
-import { WebGLRenderer } from '@engine/webgl/WebGLRenderer';
 import { GradientBackground } from '@studio/backgrounds/GradientBackground';
 import { ImageBackground } from '@studio/backgrounds/ImageBackground';
 import { CSSGradientBackground } from '@studio/backgrounds/CSSGradientBackground';
@@ -10,7 +9,7 @@ import { Ticker } from '@studio/graphics/Ticker';
 import { ControlPanel } from '@controls/ControlPanel';
 import { useKeyboardShortcuts } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig, ImageConfig } from '@types/studio';
+import type { GradientConfig, ImageConfig } from '@/types/studio';
 import './App.css';
 
 function App() {

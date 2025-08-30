@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { GradientConfig } from '@types/studio';
+import type { GradientConfig } from '@/types/studio';
 // import vertexShader from '@engine/webgl/shaders/gradient.vert';
 // import fragmentShader from '@engine/webgl/shaders/gradient.frag';
 
@@ -39,7 +39,7 @@ console.log('Using inline shaders');
 
 export class GradientBackground {
   private mesh: THREE.Mesh | null = null;
-  private material: THREE.ShaderMaterial | null = null;
+  private material: THREE.ShaderMaterial | THREE.MeshBasicMaterial | null = null;
   private geometry: THREE.PlaneGeometry | null = null;
   private config: GradientConfig;
   private startTime: number = 0;
@@ -81,18 +81,18 @@ export class GradientBackground {
       });
     }
 
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.mesh = new THREE.Mesh(this.geometry, this.material!);
     this.mesh.position.z = -1; // Place behind other elements
 
     console.log('GradientBackground mesh created:', this.mesh);
     return this.mesh;
   }
 
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     if (!this.material || !this.config.animated) return;
 
     // Update animation uniforms if they exist (shader material only)
-    if (this.material.uniforms && this.material.uniforms.time) {
+    if (this.material instanceof THREE.ShaderMaterial && this.material.uniforms && this.material.uniforms.time) {
       const currentTime = performance.now() / 1000;
       this.material.uniforms.time.value = currentTime - this.startTime;
     }
@@ -101,7 +101,7 @@ export class GradientBackground {
   updateConfig(config: Partial<GradientConfig>): void {
     Object.assign(this.config, config);
 
-    if (this.material && this.material.uniforms) {
+    if (this.material instanceof THREE.ShaderMaterial && this.material.uniforms) {
       if (config.colors) {
         const colors = config.colors.map(this.hexToVec3);
         if (this.material.uniforms.colorA) {
@@ -130,14 +130,14 @@ export class GradientBackground {
     return new THREE.Vector3(color.r, color.g, color.b);
   }
 
-  private getGradientTypeValue(): number {
-    switch (this.config.type) {
-      case 'linear': return 0;
-      case 'radial': return 1;
-      case 'conic': return 2;
-      default: return 0;
-    }
-  }
+  // private getGradientTypeValue(): number {
+  //   switch (this.config.type) {
+  //     case 'linear': return 0;
+  //     case 'radial': return 1;
+  //     case 'conic': return 2;
+  //     default: return 0;
+  //   }
+  // }
 
   dispose(): void {
     if (this.geometry) {

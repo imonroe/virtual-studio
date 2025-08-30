@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { BaseRenderer } from '../core/BaseRenderer';
-import type { RenderMode } from '@types/rendering';
+import type { RenderMode } from '@/types/rendering';
 
 export class WebGLRenderer extends BaseRenderer {
   mode: RenderMode = 'webgl';
   private renderer: THREE.WebGLRenderer | null = null;
   private scene: THREE.Scene | null = null;
   private camera: THREE.OrthographicCamera | null = null;
-  private composer: any = null; // Will implement post-processing later
+  // private composer: any = null; // Will implement post-processing later
 
   protected async onInitialize(): Promise<void> {
     if (!this.canvas) throw new Error('Canvas not initialized');

@@ -113,3 +113,48 @@ The project currently has TypeScript compilation errors that need resolution:
 - Shaders are imported as strings via vite-plugin-glsl
 - Scene cleanup is critical - dispose of geometries, materials, and textures
 - Use adaptive quality based on performance metrics
+
+## Build System Troubleshooting
+
+### Common Build Issues
+
+#### TypeScript Compilation Errors
+If you encounter import path errors like `Cannot import type declaration files`, check for:
+- **Wrong import paths**: Use `@/types/studio` not `@types/studio`
+- **Missing type imports**: Ensure all required types are imported in files that use them
+- **Path alias configuration**: Verify `tsconfig.app.json` and `vite.config.ts` have matching aliases
+
+#### Vite Configuration Issues
+Common `vite.config.ts` problems:
+- **Node.js compatibility**: Use `fileURLToPath(new URL('./src', import.meta.url))` instead of `path.resolve(__dirname, './src')`
+- **Missing dependencies**: Install `@types/node` for Node.js types
+- **Invalid plugin options**: Check plugin documentation for valid configuration options
+
+#### Build Dependencies
+Required dependencies that may be missing:
+```bash
+npm install --save-dev @types/node terser
+```
+
+#### Quick Fix Commands
+If build is broken, try these in order:
+```bash
+# 1. Install missing dependencies
+npm install
+
+# 2. Check for TypeScript errors
+npm run build
+
+# 3. Check for linting issues
+npm run lint
+
+# 4. Start development server
+npm run dev
+```
+
+### Development Server Issues
+If `npm run dev` connection is refused:
+- Try with host binding: `npm run dev -- --host`
+- Check firewall settings
+- Use network IP address shown in terminal output
+- For WSL2 users: Access from Windows browser using `localhost:3000`

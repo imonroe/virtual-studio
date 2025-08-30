@@ -190,7 +190,7 @@ export class TextRenderer {
 
 // Utility class for animated text effects
 export class AnimatedTextRenderer extends TextRenderer {
-  private animations: Map<string, any> = new Map();
+  // private animations: Map<string, any> = new Map();
 
   typewriterEffect(
     config: TextConfig,

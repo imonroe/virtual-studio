@@ -15,7 +15,12 @@
       "Bash(curl:*)",
       "Bash(sudo rm:*)",
       "Bash(docker exec:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(gh issue:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(npm run lint)",
+      "Bash(timeout 10s npm run dev)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []

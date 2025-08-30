@@ -1,5 +1,5 @@
 import { BaseRenderer } from '../core/BaseRenderer';
-import type { RenderMode } from '@types/rendering';
+import type { RenderMode } from '@/types/rendering';
 
 export class Canvas2DRenderer extends BaseRenderer {
   mode: RenderMode = 'canvas2d';
@@ -63,7 +63,7 @@ export class Canvas2DRenderer extends BaseRenderer {
     }
   }
 
-  protected renderContent(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D): void {
+  protected renderContent(_ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D): void {
     // Override in subclasses
   }
 

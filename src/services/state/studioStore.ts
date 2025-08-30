@@ -9,8 +9,9 @@ import type {
   Clock, 
   LiveIndicator,
   StudioPreset,
-  GradientConfig
-} from '@types/studio';
+  GradientConfig,
+  ImageConfig
+} from '@/types/studio';
 
 interface StudioState {
   // Current active elements
@@ -239,8 +240,12 @@ export const useStudioStore = create<StudioState>()(
             state.background = { ...preset.background };
             state.lowerThird = preset.lowerThird ? { ...preset.lowerThird } : null;
             state.ticker = preset.ticker ? { ...preset.ticker } : null;
-            state.clock = { ...preset.clock };
-            state.liveIndicator = { ...preset.liveIndicator };
+            if (preset.clock) {
+              state.clock = { ...preset.clock };
+            }
+            if (preset.liveIndicator) {
+              state.liveIndicator = { ...preset.liveIndicator };
+            }
             state.activePresetId = presetId;
           }
         }),

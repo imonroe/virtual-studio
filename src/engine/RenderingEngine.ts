@@ -1,6 +1,6 @@
 import { WebGLRenderer } from './webgl/WebGLRenderer';
 import { Canvas2DRenderer } from './canvas/Canvas2DRenderer';
-import type { Renderer, RenderMode, RenderStats } from '@types/rendering';
+import type { Renderer, RenderMode, RenderStats } from '@/types/rendering';
 
 export interface RenderingEngineConfig {
   preferredMode?: RenderMode;
@@ -16,8 +16,10 @@ export class RenderingEngine {
   private targetFrameTime: number = 1000 / 60; // 60 FPS default
   private isRunning: boolean = false;
   private renderCallback?: (deltaTime: number) => void;
+  private config: RenderingEngineConfig;
 
-  constructor(private config: RenderingEngineConfig = {}) {
+  constructor(config: RenderingEngineConfig = {}) {
+    this.config = config;
     this.targetFrameTime = 1000 / (config.targetFPS || 60);
   }
 
