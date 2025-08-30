@@ -57,7 +57,7 @@ export const logoService = {
               fileName: file.name
             });
           }
-        } catch (_error) {
+        } catch {
           reject(new Error('Failed to process image'));
         }
       };
