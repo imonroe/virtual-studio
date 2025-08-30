@@ -1,6 +1,6 @@
 # Virtual Studio
 
-A high-performance, browser-based broadcast graphics application designed for content creators, streamers, and video producers. Virtual Studio provides professional-quality overlay graphics that work seamlessly with OBS Studio and other streaming software.
+A high-performance, browser-based broadcast graphics application designed for content creators, streamers, and video producers. Virtual Studio provides professional-quality overlay graphics that work seamlessly with OBS Studio and other streaming software. test
 
 ## Features
 
@@ -40,7 +40,7 @@ A high-performance, browser-based broadcast graphics application designed for co
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm, yarn, or pnpm
 
 ### Installation
@@ -65,7 +65,7 @@ A high-performance, browser-based broadcast graphics application designed for co
    npm run dev
    # or
    yarn dev
-   # or  
+   # or
    pnpm dev
    ```
 
@@ -89,7 +89,7 @@ npm run preview
 
 ### Recommended OBS Settings
 - **Width**: 1920
-- **Height**: 1080  
+- **Height**: 1080
 - **FPS**: 60 (if your system supports it)
 - **Custom CSS**: Not needed - styling is built-in
 
@@ -165,7 +165,7 @@ VITE_ENABLE_PERFORMANCE_MONITOR=false
 The project uses TypeScript path aliases for clean imports:
 
 - `@engine/*` - Rendering engine components
-- `@studio/*` - Studio graphics and backgrounds  
+- `@studio/*` - Studio graphics and backgrounds
 - `@controls/*` - UI controls and panels
 - `@services/*` - Business logic services
 - `@animations/*` - Animation system
@@ -220,7 +220,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Documentation
 
 - [Product Requirements](docs/product_requirements.md) - Detailed feature specifications
-- [Implementation Plan](docs/implementation_plan.md) - Technical architecture and development roadmap  
+- [Implementation Plan](docs/implementation_plan.md) - Technical architecture and development roadmap
 - [Style Guide](docs/style_guide.md) - Design system and UI guidelines
 
 ## Support
@@ -272,7 +272,7 @@ The development server will be available at `http://localhost:3000`
 
 ### Prerequisites
 
-- Node.js 20+ 
+- Node.js 20+
 - npm or pnpm
 
 ### Setup
