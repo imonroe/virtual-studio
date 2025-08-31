@@ -3,11 +3,13 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT) || 3000;
 
 console.log('Starting server...');
 console.log('Current directory:', __dirname);
 console.log('PORT:', PORT);
+console.log('PORT type:', typeof process.env.PORT);
+console.log('Environment variables:', JSON.stringify(process.env, null, 2));
 
 // Check if dist directory exists
 const distPath = path.join(__dirname, 'dist');
@@ -55,11 +57,14 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-app.listen(PORT, '0.0.0.0', (err) => {
-  if (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  }
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Health check available at http://localhost:${PORT}/health`);
-});
+// Add a small delay to ensure everything is ready
+setTimeout(() => {
+  app.listen(PORT, '0.0.0.0', (err) => {
+    if (err) {
+      console.error('Failed to start server:', err);
+      process.exit(1);
+    }
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Health check available at http://localhost:${PORT}/health`);
+  });
+}, 1000);
