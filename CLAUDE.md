@@ -35,6 +35,27 @@ No test runner is currently configured. Tests would need to be added with Vitest
 - `docker run -p 8080:80 virtual-studio:latest` - Run production container
 - `docker exec -it virtual-studio sh` - Access container shell
 
+### CapRover Deployment
+
+The application can be deployed to CapRover using the included `captain-definition` file.
+
+#### Setup Process
+1. Connect repository to CapRover app
+2. CapRover uses Node.js template deployment automatically
+3. Build process runs during startup: `npm run build && node server.cjs`
+4. Application serves on dynamic PORT assigned by CapRover
+
+#### Key Configuration Files
+- `captain-definition` - Uses Node.js template (`"templateId": "node/20"`)
+- `server.cjs` - Express.js server for SPA routing and static file serving
+- Modified `package.json` - Build dependencies moved to production for CapRover compatibility
+
+#### Deployment Command Flow
+1. `npm install --production` (installs all dependencies including build tools)
+2. Copy source files
+3. `npm start` → `npm run build && node server.cjs`
+4. Express server serves built React app from `/dist` directory
+
 ## Architecture
 
 ### Technology Stack
@@ -162,6 +183,53 @@ If `npm run dev` connection is refused:
 - Check firewall settings
 - Use network IP address shown in terminal output
 - For WSL2 users: Access from Windows browser using `localhost:3000`
+
+### CapRover Deployment Troubleshooting
+
+#### Build Failures
+**Problem**: `sh: tsc: not found` during build
+- **Cause**: Build dependencies in devDependencies, CapRover uses `--production`
+- **Solution**: Move build tools (typescript, vite, @vitejs/plugin-react) to dependencies
+
+**Problem**: `Cannot read file '/usr/src/app/tsconfig.json'`
+- **Cause**: Build running before source files copied (postinstall timing issue)
+- **Solution**: Remove postinstall script, use `"start": "npm run build && node server.cjs"`
+
+#### Runtime Issues
+**Problem**: 50x errors after successful build
+- **Cause**: Server using ES modules in container environment
+- **Solution**: Use CommonJS server (`server.cjs` with `require()` statements)
+
+**Problem**: "index.html not found" error
+- **Cause**: Build not running or dist directory missing
+- **Solution**: Ensure build runs in start command: `npm run build && node server.cjs`
+
+**Problem**: 502 errors (server not responding)
+- **Cause**: Port binding issues or server startup failures
+- **Solution**: 
+  - Parse PORT as integer: `parseInt(process.env.PORT) || 3000`
+  - Bind to all interfaces: `app.listen(PORT, '0.0.0.0')`
+  - Add startup delay: `setTimeout(() => { app.listen(...) }, 1000)`
+
+#### Package.json Configuration for CapRover
+```json
+{
+  "scripts": {
+    "start": "npm run build && node server.cjs"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2",
+    "@vitejs/plugin-react": "^5.0.0"
+  }
+}
+```
+
+#### Captain Definition Best Practices
+- Use Node.js template: `{"schemaVersion": 2, "templateId": "node/20"}`
+- Avoid custom Dockerfiles for simple React apps
+- Let CapRover handle port configuration automatically
 
 ## Linting and Code Quality
 
