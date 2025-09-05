@@ -164,6 +164,28 @@ import type { StudioConfig } from '@/types/studio';
 - `p`: Toggle Preview Mode
 - `Escape`: Hide All Overlays
 
+### Live Indicator Positioning Bug Fix (September 5, 2025)
+
+**Problem**: Live indicator positioning sliders only allowed movement to ~50% of canvas (GitHub Issue #8)
+**Root Cause**: Hardcoded slider maximums (X: 400px, Y: 200px) instead of using actual stage dimensions
+
+**Solution Process**:
+1. **Identified stage vs viewport distinction** - `.studio-stage` uses responsive CSS with `aspect-ratio: 16/9` and dynamic sizing
+2. **Implemented dynamic dimension detection** - Uses `document.querySelector('.studio-stage').getBoundingClientRect()` to get actual rendered size
+3. **Added responsive positioning limits** - Calculates max X/Y based on stage dimensions minus element size
+4. **Added window resize handling** - Updates limits automatically when viewport changes
+
+**Key Lessons**:
+- **Stage vs Viewport**: Positioning should be relative to the actual rendered stage element, not browser viewport
+- **Dynamic Sizing**: The `.studio-stage` element size changes based on viewport due to CSS `max-width: min(calc(100vh * 16/9), calc(100vw - 360px - 40px))`
+- **Element Size Compensation**: Must subtract estimated element dimensions from limits to prevent overflow
+- **Responsive Design**: Controls must adapt to actual rendered dimensions for proper user experience
+
+**Technical Implementation**:
+- **Before**: `max="400"` (fixed) → **After**: `max={limits.liveIndicator.maxX}` (dynamic)
+- **Stage Detection**: Real-time DOM measurement with cleanup on unmount
+- **Element Estimation**: Live indicator ~80px wide, ~30px tall for positioning calculations
+
 ## Build System Troubleshooting
 
 ### Common Build Issues

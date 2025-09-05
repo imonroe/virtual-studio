@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
 
 export const OverlayControls: React.FC = () => {
@@ -8,6 +8,57 @@ export const OverlayControls: React.FC = () => {
   const setLiveIndicator = useStudioStore((state) => state.setLiveIndicator);
   const toggleClock = useStudioStore((state) => state.toggleClock);
   const toggleLiveIndicator = useStudioStore((state) => state.toggleLiveIndicator);
+
+  // State for actual stage dimensions
+  const [stageDimensions, setStageDimensions] = useState({
+    width: 1920,
+    height: 1080
+  });
+
+  // Update stage dimensions by observing the actual .studio-stage element
+  useEffect(() => {
+    const updateStageDimensions = () => {
+      const stageElement = document.querySelector('.studio-stage') as HTMLElement;
+      if (stageElement) {
+        const rect = stageElement.getBoundingClientRect();
+        setStageDimensions({
+          width: rect.width,
+          height: rect.height
+        });
+      }
+    };
+
+    // Update dimensions on mount and when window resizes
+    updateStageDimensions();
+    window.addEventListener('resize', updateStageDimensions);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', updateStageDimensions);
+    };
+  }, []);
+
+  // Calculate positioning limits accounting for element size
+  const getPositioningLimits = () => {
+    // Estimate element dimensions for positioning limits
+    const clockElementWidth = clock.style.fontSize * 4; // Approx 4 characters wide (HH:MM)
+    const clockElementHeight = clock.style.fontSize * 1.2; // Account for padding
+    const liveIndicatorWidth = 80; // Approximate width of "LIVE" indicator
+    const liveIndicatorHeight = 30; // Approximate height including padding
+    
+    return {
+      clock: {
+        maxX: Math.max(0, stageDimensions.width - clockElementWidth),
+        maxY: Math.max(0, stageDimensions.height - clockElementHeight)
+      },
+      liveIndicator: {
+        maxX: Math.max(0, stageDimensions.width - liveIndicatorWidth),
+        maxY: Math.max(0, stageDimensions.height - liveIndicatorHeight)
+      }
+    };
+  };
+
+  const limits = getPositioningLimits();
 
   return (
     <div className="control-section">
@@ -76,8 +127,8 @@ export const OverlayControls: React.FC = () => {
                 type="range"
                 className="control-input"
                 min="0"
-                max="400"
-                value={clock.position.x}
+                max={limits.clock.maxX}
+                value={Math.min(clock.position.x, limits.clock.maxX)}
                 onChange={(e) => setClock({ 
                   position: { ...clock.position, x: Number(e.target.value) }
                 })}
@@ -90,8 +141,8 @@ export const OverlayControls: React.FC = () => {
                 type="range"
                 className="control-input"
                 min="0"
-                max="200"
-                value={clock.position.y}
+                max={limits.clock.maxY}
+                value={Math.min(clock.position.y, limits.clock.maxY)}
                 onChange={(e) => setClock({ 
                   position: { ...clock.position, y: Number(e.target.value) }
                 })}
@@ -180,8 +231,8 @@ export const OverlayControls: React.FC = () => {
                 type="range"
                 className="control-input"
                 min="0"
-                max="400"
-                value={liveIndicator.position.x}
+                max={limits.liveIndicator.maxX}
+                value={Math.min(liveIndicator.position.x, limits.liveIndicator.maxX)}
                 onChange={(e) => setLiveIndicator({ 
                   position: { ...liveIndicator.position, x: Number(e.target.value) }
                 })}
@@ -194,8 +245,8 @@ export const OverlayControls: React.FC = () => {
                 type="range"
                 className="control-input"
                 min="0"
-                max="200"
-                value={liveIndicator.position.y}
+                max={limits.liveIndicator.maxY}
+                value={Math.min(liveIndicator.position.y, limits.liveIndicator.maxY)}
                 onChange={(e) => setLiveIndicator({ 
                   position: { ...liveIndicator.position, y: Number(e.target.value) }
                 })}
@@ -249,12 +300,12 @@ export const OverlayControls: React.FC = () => {
             onClick={() => {
               setClock({ 
                 visible: true,
-                position: { x: 300, y: 20 },
+                position: { x: Math.max(0, stageDimensions.width - 200), y: 20 },
                 style: { ...clock.style, fontSize: 20 }
               });
               setLiveIndicator({ 
                 visible: true,
-                position: { x: 300, y: 50 },
+                position: { x: Math.max(0, stageDimensions.width - 200), y: 50 },
                 color: '#00ff00'
               });
             }}
