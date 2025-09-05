@@ -152,7 +152,7 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Virtual Studio. Built with React, TypeScript, and WebGL.</p>
+            <p>&copy; 2025 <a href="https://monroedigitalconsulting.com" target="_blank" rel="noopener noreferrer">Monroe Digital LLC</a>. Built with React, TypeScript, and WebGL.</p>
           </div>
         </footer>
       </div>
