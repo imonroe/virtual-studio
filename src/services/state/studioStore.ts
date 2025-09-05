@@ -37,6 +37,7 @@ interface StudioState {
   // UI State
   controlPanelOpen: boolean;
   previewMode: boolean;
+  keyboardShortcutsVisible: boolean;
   
   // Performance settings
   targetFPS: 60 | 30;
@@ -58,6 +59,7 @@ interface StudioState {
   // UI actions
   toggleControlPanel: () => void;
   setPreviewMode: (enabled: boolean) => void;
+  toggleKeyboardShortcuts: () => void;
   
   // Performance actions
   setTargetFPS: (fps: 60 | 30) => void;
@@ -135,6 +137,7 @@ const getInitialState = () => {
       activePresetId: savedState.activePresetId || null,
       controlPanelOpen: true, // UI state - don't persist
       previewMode: true, // UI state - don't persist
+      keyboardShortcutsVisible: savedState.keyboardShortcutsVisible !== undefined ? savedState.keyboardShortcutsVisible : true,
       targetFPS: (savedState.targetFPS as 60 | 30) || 60,
       quality: (savedState.quality as 'low' | 'medium' | 'high') || 'high',
     };
@@ -152,6 +155,7 @@ const getInitialState = () => {
     activePresetId: null,
     controlPanelOpen: true,
     previewMode: true,
+    keyboardShortcutsVisible: true,
     targetFPS: 60 as const,
     quality: 'high' as const,
   };
@@ -344,6 +348,11 @@ export const useStudioStore = create<StudioState>()(
       setPreviewMode: (enabled) =>
         set((state) => {
           state.previewMode = enabled;
+        }),
+
+      toggleKeyboardShortcuts: () =>
+        set((state) => {
+          state.keyboardShortcutsVisible = !state.keyboardShortcutsVisible;
         }),
 
       setTargetFPS: (fps) =>

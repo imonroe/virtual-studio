@@ -396,3 +396,70 @@ const getPositioningLimits = () => {
 ```
 
 **Result**: Successfully transformed basic clock into flexible Date/Time overlay system addressing user's evolving requirements while maintaining intuitive controls.
+
+### Collapsible Keyboard Shortcuts Panel Implementation (September 5, 2025)
+
+**Context**: GitHub Issue #7 - Make the keyboard shortcuts panel collapsible to save screen real estate
+
+**Key Implementation Lessons:**
+
+#### Planning and Approach Selection
+- **Multiple approaches evaluation**: Always consider 3+ implementation strategies before selecting the best one
+- **Architectural consistency**: Choose approaches that align with existing patterns (Zustand store for UI state vs local component state)
+- **Future-proofing**: Global state management allows features to be extended or referenced elsewhere
+- **User requirements analysis**: Issue specifically requested localStorage persistence, which influenced architecture choice
+
+#### State Management Architecture Patterns
+- **UI State Categories**: Distinguish between temporary UI state (controlPanelOpen) and user preferences (keyboardShortcutsVisible)
+- **Persistence Strategy**: User preferences should persist across sessions, temporary states should not
+- **Global vs Local State**: UI preferences that might be referenced elsewhere belong in global store
+- **State Initialization**: Handle backwards compatibility with `savedState.keyboardShortcutsVisible !== undefined ? savedState.keyboardShortcutsVisible : true`
+
+#### TypeScript Interface Evolution
+- **Interface Extension**: Add new properties to existing interfaces rather than creating separate ones when logically related
+- **Long Parameter Lists**: TypeScript parameter type declarations can become unwieldy - consider refactoring for maintainability
+- **Backwards Compatibility**: New optional properties allow gradual adoption without breaking existing code
+
+#### CSS Animation Best Practices
+- **Performance**: Use GPU-accelerated properties (transform, opacity) for animations
+- **Accessibility**: Always provide `@media (prefers-reduced-motion: reduce)` fallbacks
+- **Animation Timing**: Follow style guide standards (0.2s ease for quick interactions)
+- **Visual Feedback**: Subtle animations improve perceived responsiveness
+
+#### Component Design Patterns
+- **Conditional Rendering**: Use `{condition && <component />}` for clean show/hide logic
+- **Accessibility First**: Include aria-expanded, aria-label, and title attributes for screen readers
+- **Visual States**: Clear visual indicators for expand/collapse states (▼/▶ arrows)
+- **Hover States**: Consistent hover feedback across all interactive elements
+
+#### Development Workflow Insights
+- **Build-First Testing**: Always run `npm run build` before manual testing to catch TypeScript errors
+- **Import Cleanup**: Remove unused imports immediately to avoid build errors
+- **Incremental Implementation**: Update store → update localStorage → update UI → add styling → test
+- **Documentation Integration**: Update project documentation while implementation details are fresh
+
+#### Technical Implementation Details
+```typescript
+// Proper state management with persistence
+interface StudioState {
+  keyboardShortcutsVisible: boolean;  // User preference - persisted
+  controlPanelOpen: boolean;          // UI state - not persisted
+}
+
+// CSS animation with accessibility
+.shortcuts-content {
+  animation: slideDown 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shortcuts-content { animation: none; }
+}
+```
+
+#### User Experience Considerations
+- **Default State**: Start with visible shortcuts (less surprising for new users)
+- **Visual Hierarchy**: Toggle button should be subtle but discoverable
+- **Immediate Feedback**: Changes should be reflected instantly without page refresh
+- **State Persistence**: User's choice remembered across browser sessions builds trust
+
+**Result**: Successfully implemented a user-requested feature that reduces screen clutter while maintaining accessibility and following established architectural patterns. The solution demonstrates how small UX improvements can significantly impact user satisfaction when implemented thoughtfully.

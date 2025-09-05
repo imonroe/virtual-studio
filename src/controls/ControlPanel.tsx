@@ -6,7 +6,6 @@ import { OverlayControls } from './panels/OverlayControls';
 import { PresetControls } from './panels/PresetControls';
 import { StorageControls } from './panels/StorageControls';
 import { BrandingControls } from './panels/BrandingControls';
-import { KeyboardShortcutsHelp } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
 import './ControlPanel.css';
 
@@ -32,6 +31,8 @@ export const ControlPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('background');
   const controlPanelOpen = useStudioStore((state) => state.controlPanelOpen);
   const toggleControlPanel = useStudioStore((state) => state.toggleControlPanel);
+  const keyboardShortcutsVisible = useStudioStore((state) => state.keyboardShortcutsVisible);
+  const toggleKeyboardShortcuts = useStudioStore((state) => state.toggleKeyboardShortcuts);
   // Shortcuts for display in help panel (not functional, just for UI)
   const shortcuts = [
     { key: '0', description: 'Toggle Background' },
@@ -106,7 +107,50 @@ export const ControlPanel: React.FC = () => {
         </div>
 
         <div className="control-panel-footer">
-          <KeyboardShortcutsHelp shortcuts={shortcuts} />
+          <div className="keyboard-shortcuts-section">
+            <div className="shortcuts-header">
+              <h4 style={{ margin: '0', color: '#fff', fontSize: '14px' }}>
+                Keyboard Shortcuts
+              </h4>
+              <button
+                className="shortcuts-toggle-button"
+                onClick={toggleKeyboardShortcuts}
+                aria-expanded={keyboardShortcutsVisible}
+                aria-label={keyboardShortcutsVisible ? 'Hide keyboard shortcuts' : 'Show keyboard shortcuts'}
+                title={keyboardShortcutsVisible ? 'Hide shortcuts' : 'Show shortcuts'}
+              >
+                {keyboardShortcutsVisible ? '▼' : '▶'}
+              </button>
+            </div>
+            {keyboardShortcutsVisible && (
+              <div className="shortcuts-content">
+                <div style={{ fontSize: '12px', color: '#aaa', marginTop: '12px' }}>
+                  {shortcuts.map((shortcut, index) => (
+                    <div 
+                      key={index} 
+                      style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        marginBottom: '4px',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <span>{shortcut.description}</span>
+                      <kbd style={{
+                        background: '#333',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        fontSize: '11px',
+                        fontFamily: 'monospace'
+                      }}>
+                        {shortcut.key === ' ' ? 'Space' : shortcut.key}
+                      </kbd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="status-info" style={{ marginTop: '16px' }}>
             <div className="status-item">
               <span className="status-label">FPS:</span>

@@ -15,6 +15,7 @@ export interface SavedStudioState {
   targetFPS: 60 | 30;
   quality: 'low' | 'medium' | 'high';
   lastImageConfig: ImageConfig | null;
+  keyboardShortcutsVisible: boolean;
 }
 
 export interface StorageState {
@@ -25,7 +26,7 @@ export interface StorageState {
 
 export const localStorageService = {
   // Save state to localStorage
-  saveState: (state: { background: StudioBackground; lowerThird: LowerThird | null; ticker: Ticker | null; clock: Clock; liveIndicator: LiveIndicator; logos: LogoConfig[]; presets: StudioPreset[]; activePresetId: string | null; targetFPS: 60 | 30; quality: 'low' | 'medium' | 'high'; lastImageConfig: ImageConfig | null }): void => {
+  saveState: (state: { background: StudioBackground; lowerThird: LowerThird | null; ticker: Ticker | null; clock: Clock; liveIndicator: LiveIndicator; logos: LogoConfig[]; presets: StudioPreset[]; activePresetId: string | null; targetFPS: 60 | 30; quality: 'low' | 'medium' | 'high'; lastImageConfig: ImageConfig | null; keyboardShortcutsVisible: boolean }): void => {
     try {
       const storageState: StorageState = {
         version: STORAGE_VERSION,
@@ -42,6 +43,7 @@ export const localStorageService = {
           targetFPS: state.targetFPS,
           quality: state.quality,
           lastImageConfig: state.lastImageConfig,
+          keyboardShortcutsVisible: state.keyboardShortcutsVisible,
         }
       };
       

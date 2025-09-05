@@ -326,6 +326,72 @@
   background: #222;
 }
 
+.keyboard-shortcuts-section {
+  margin-bottom: 16px;
+}
+
+.shortcuts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.shortcuts-toggle-button {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.shortcuts-toggle-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.shortcuts-toggle-button:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+.shortcuts-content {
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .shortcuts-content {
+    animation: none;
+  }
+  
+  .shortcuts-toggle-button {
+    transition: none;
+  }
+}
+
 .status-info {
   display: flex;
   gap: 16px;
