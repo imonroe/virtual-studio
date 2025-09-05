@@ -149,6 +149,11 @@ textarea {
     box-sizing: border-box;
 }
 
+select option {
+  background-color: var(--color-input-bg);
+  color: var(--color-input-text);
+}
+
 /* Input placeholder */
 input::placeholder,
 textarea::placeholder {
