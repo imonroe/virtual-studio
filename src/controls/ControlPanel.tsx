@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { BackgroundControls } from './panels/BackgroundControls';
 import { LowerThirdControls } from './panels/LowerThirdControls';
 import { TickerControls } from './panels/TickerControls';
@@ -160,6 +161,13 @@ export const ControlPanel: React.FC = () => {
               <span className="status-label">Mode:</span>
               <span className="status-value">WebGL</span>
             </div>
+          </div>
+          
+          {/* Feedback Button */}
+          <div className="feedback-section" style={{ marginTop: '16px' }}>
+            <Link to="/feedback" className="feedback-button" title="Report bugs or request features">
+              💬 Send Feedback
+            </Link>
           </div>
         </div>
       </div>

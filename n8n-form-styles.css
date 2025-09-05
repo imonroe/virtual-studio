@@ -1,0 +1,362 @@
+/* Virtual Studio N8N Form Styles - Dark Theme */
+:root {
+    /* Typography - Inter font family matching our design system */
+    --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
+    --font-weight-semibold: 700;
+    
+    /* Font Sizes - Consistent with Virtual Studio */
+    --font-size-body: 14px;
+    --font-size-label: 14px;
+    --font-size-test-notice: 12px;
+    --font-size-input: 14px;
+    --font-size-header: 24px;
+    --font-size-paragraph: 14px;
+    --font-size-link: 14px;
+    --font-size-error: 12px;
+    --font-size-html-h1: 28px;
+    --font-size-html-h2: 24px;
+    --font-size-html-h3: 18px;
+    --font-size-html-h4: 16px;
+    --font-size-html-h5: 14px;
+    --font-size-html-h6: 12px;
+    --font-size-subheader: 16px;
+
+    /* Colors - Virtual Studio Dark Theme */
+    --color-background: #1a1a1a;
+    --color-test-notice-text: #646cff;
+    --color-test-notice-bg: rgba(100, 108, 255, 0.1);
+    --color-test-notice-border: rgba(100, 108, 255, 0.3);
+    --color-card-bg: rgba(255, 255, 255, 0.02);
+    --color-card-border: rgba(255, 255, 255, 0.1);
+    --color-card-shadow: rgba(0, 0, 0, 0.3);
+    --color-link: #646cff;
+    --color-header: #ffffff;
+    --color-label: #cccccc;
+    --color-input-border: #444444;
+    --color-input-text: #ffffff;
+    --color-input-bg: #2a2a2a;
+    --color-focus-border: #646cff;
+    --color-submit-btn-bg: #646cff;
+    --color-submit-btn-text: #ffffff;
+    --color-submit-btn-hover: #535bf2;
+    --color-error: #dc2626;
+    --color-required: #646cff;
+    --color-clear-button-bg: #444444;
+    --color-html-text: #cccccc;
+    --color-html-link: #646cff;
+    --color-header-subtext: #aaaaaa;
+    --color-placeholder: #888888;
+
+    /* Border Radii - Consistent with Virtual Studio */
+    --border-radius-card: 12px;
+    --border-radius-input: 8px;
+    --border-radius-clear-btn: 6px;
+    --card-border-radius: 12px;
+
+    /* Spacing - Adjusted for better visual hierarchy */
+    --padding-container-top: 32px;
+    --padding-card: 24px;
+    --padding-test-notice-vertical: 16px;
+    --padding-test-notice-horizontal: 20px;
+    --margin-bottom-card: 20px;
+    --padding-form-input: 12px 16px;
+    --card-padding: 24px;
+    --card-margin-bottom: 20px;
+
+    /* Dimensions */
+    --container-width: 600px;
+    --submit-btn-height: 48px;
+    --checkbox-size: 18px;
+
+    /* Effects - Glass-morphism and modern shadows */
+    --box-shadow-card: 0px 8px 32px 0px var(--color-card-shadow);
+    --backdrop-filter: blur(10px);
+    --opacity-placeholder: 0.6;
+    --transition-duration: 0.2s;
+}
+
+/* Global form styling */
+body {
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+    color: var(--color-html-text);
+    font-family: var(--font-family);
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Form container */
+.form-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow-card);
+    backdrop-filter: var(--backdrop-filter);
+    padding: var(--card-padding);
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-header);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: 16px;
+    line-height: 1.3;
+}
+
+h1 { font-size: var(--font-size-html-h1); }
+h2 { font-size: var(--font-size-html-h2); }
+h3 { font-size: var(--font-size-html-h3); }
+
+/* Form labels */
+label {
+    color: var(--color-label);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Required field indicators */
+.required::after {
+    content: " *";
+    color: var(--color-required);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: var(--padding-form-input);
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--border-radius-input);
+    color: var(--color-input-text);
+    font-size: var(--font-size-input);
+    font-family: var(--font-family);
+    transition: all var(--transition-duration) ease;
+    box-sizing: border-box;
+}
+
+/* Input placeholder */
+input::placeholder,
+textarea::placeholder {
+    color: var(--color-placeholder);
+    opacity: var(--opacity-placeholder);
+}
+
+/* Input focus states */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-focus-border);
+    box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+/* Select dropdowns */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cccccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Checkboxes and radio buttons */
+input[type="checkbox"],
+input[type="radio"] {
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    margin-right: 12px;
+    accent-color: var(--color-focus-border);
+}
+
+/* Checkbox/radio labels */
+.checkbox-label,
+.radio-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+    color: var(--color-label);
+}
+
+/* Textarea specific */
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Submit button */
+button[type="submit"],
+.submit-btn {
+    width: 100%;
+    height: var(--submit-btn-height);
+    background: var(--color-submit-btn-bg);
+    color: var(--color-submit-btn-text);
+    border: 2px solid var(--color-submit-btn-bg);
+    border-radius: var(--border-radius-input);
+    font-size: var(--font-size-input);
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-duration) ease;
+    margin-top: 24px;
+}
+
+button[type="submit"]:hover,
+.submit-btn:hover {
+    background: var(--color-submit-btn-hover);
+    border-color: var(--color-submit-btn-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(100, 108, 255, 0.3);
+}
+
+button[type="submit"]:active,
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Error messages */
+.error-message,
+.validation-error {
+    color: var(--color-error);
+    font-size: var(--font-size-error);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Success messages */
+.success-message {
+    color: var(--color-focus-border);
+    background: rgba(100, 108, 255, 0.1);
+    border: 1px solid rgba(100, 108, 255, 0.3);
+    padding: 16px;
+    border-radius: var(--border-radius-input);
+    margin: 16px 0;
+}
+
+/* Links */
+a {
+    color: var(--color-link);
+    text-decoration: none;
+    transition: color var(--transition-duration) ease;
+}
+
+a:hover {
+    color: var(--color-submit-btn-hover);
+    text-decoration: underline;
+}
+
+/* Form sections/fieldsets */
+fieldset {
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius-input);
+    padding: 20px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+legend {
+    color: var(--color-header);
+    font-weight: var(--font-weight-bold);
+    padding: 0 12px;
+}
+
+/* Test notice styling */
+.test-notice {
+    background: var(--color-test-notice-bg);
+    border: 1px solid var(--color-test-notice-border);
+    color: var(--color-test-notice-text);
+    padding: var(--padding-test-notice-vertical) var(--padding-test-notice-horizontal);
+    border-radius: var(--border-radius-input);
+    margin-bottom: 20px;
+    font-size: var(--font-size-test-notice);
+}
+
+/* Clear/reset button */
+.clear-btn,
+button[type="reset"] {
+    background: var(--color-clear-button-bg);
+    color: var(--color-input-text);
+    border: 1px solid var(--color-input-border);
+    padding: 8px 16px;
+    border-radius: var(--border-radius-clear-btn);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all var(--transition-duration) ease;
+}
+
+.clear-btn:hover,
+button[type="reset"]:hover {
+    background: #555555;
+    transform: translateY(-1px);
+}
+
+/* Form groups/containers */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Progress indicator (if used) */
+.progress-bar {
+    background: var(--color-input-border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.progress-fill {
+    background: var(--color-focus-border);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    :root {
+        --container-width: calc(100vw - 32px);
+        --card-padding: 20px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    body {
+        padding: 16px;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
