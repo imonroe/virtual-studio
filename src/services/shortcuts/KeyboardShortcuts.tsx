@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
 
 interface KeyboardShortcut {
@@ -6,7 +6,7 @@ interface KeyboardShortcut {
   ctrlKey?: boolean;
   shiftKey?: boolean;
   altKey?: boolean;
-  action: () => void;
+  action: (event?: KeyboardEvent) => void;
   description: string;
 }
 
@@ -72,7 +72,10 @@ const useKeyboardShortcuts = () => {
     },
     {
       key: 'Tab',
-      action: toggleControlPanel,
+      action: (event?: KeyboardEvent) => {
+        if (event) event.preventDefault();
+        toggleControlPanel();
+      },
       description: 'Toggle Control Panel'
     },
     {
@@ -83,11 +86,12 @@ const useKeyboardShortcuts = () => {
     {
       key: 'Escape',
       action: () => {
-        // Hide all overlays
-        toggleClock();
-        toggleLiveIndicator();
-        toggleLowerThird();
-        toggleTicker();
+        // Hide all visible overlays
+        const state = useStudioStore.getState();
+        if (state.clock.visible) toggleClock();
+        if (state.liveIndicator.visible) toggleLiveIndicator();
+        if (state.lowerThird?.visible) toggleLowerThird();
+        if (state.ticker?.visible) toggleTicker();
       },
       description: 'Hide All Overlays'
     }
@@ -108,12 +112,21 @@ const useKeyboardShortcuts = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('🎹 Key pressed:', {
+        key: event.key,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        target: event.target?.constructor.name
+      });
+
       // Don't trigger shortcuts if user is typing in an input
       if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement ||
         event.target instanceof HTMLSelectElement
       ) {
+        console.log('🎹 Ignoring key press - user typing in input field');
         return;
       }
 
@@ -126,15 +139,59 @@ const useKeyboardShortcuts = () => {
         return keyMatch && ctrlMatch && shiftMatch && altMatch;
       });
 
+      console.log('🎹 Found shortcut:', shortcut ? shortcut.description : 'None');
+
       if (shortcut) {
         event.preventDefault();
-        shortcut.action();
+        console.log('🎹 Executing shortcut:', shortcut.description);
+        
+        // Visual feedback for shortcut activation
+        const notification = document.createElement('div');
+        notification.textContent = `⌨️ ${shortcut.description}`;
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 4px;
+          font-size: 12px;
+          z-index: 10000;
+          animation: fadeInOut 2s ease-in-out forwards;
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+          }
+        `;
+        
+        if (!document.querySelector('#shortcut-animation')) {
+          style.id = 'shortcut-animation';
+          document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 2000);
+        
+        shortcut.action(event);
       }
     };
 
+    console.log('🎹 Keyboard shortcuts initialized with', shortcuts.length, 'shortcuts');
     document.addEventListener('keydown', handleKeyDown);
     
     return () => {
+      console.log('🎹 Keyboard shortcuts cleanup');
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [shortcuts]);
@@ -142,41 +199,50 @@ const useKeyboardShortcuts = () => {
   return { shortcuts };
 };
 
-export { useKeyboardShortcuts };
+export { useKeyboardShortcuts, type KeyboardShortcut };
+
+// Simple shortcut display interface
+interface SimpleShortcut {
+  key: string;
+  description: string;
+}
 
 // Keyboard shortcuts help component
-export const KeyboardShortcutsHelp: React.FC<{ shortcuts: KeyboardShortcut[] }> = ({ shortcuts }) => {
+export const KeyboardShortcutsHelp: React.FC<{ shortcuts: KeyboardShortcut[] | SimpleShortcut[] }> = ({ shortcuts }) => {
   return (
     <div className="shortcuts-help">
       <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '14px' }}>
         Keyboard Shortcuts
       </h4>
       <div style={{ fontSize: '12px', color: '#aaa' }}>
-        {shortcuts.map((shortcut, index) => (
-          <div 
-            key={index} 
-            style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              marginBottom: '4px',
-              alignItems: 'center'
-            }}
-          >
-            <span>{shortcut.description}</span>
-            <kbd style={{
-              background: '#333',
-              padding: '2px 6px',
-              borderRadius: '3px',
-              fontSize: '11px',
-              fontFamily: 'monospace'
-            }}>
-              {shortcut.ctrlKey && 'Ctrl+'}
-              {shortcut.shiftKey && 'Shift+'}
-              {shortcut.altKey && 'Alt+'}
-              {shortcut.key === ' ' ? 'Space' : shortcut.key}
-            </kbd>
-          </div>
-        ))}
+        {shortcuts.map((shortcut, index) => {
+          const fullShortcut = shortcut as KeyboardShortcut;
+          return (
+            <div 
+              key={index} 
+              style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                marginBottom: '4px',
+                alignItems: 'center'
+              }}
+            >
+              <span>{shortcut.description}</span>
+              <kbd style={{
+                background: '#333',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                fontSize: '11px',
+                fontFamily: 'monospace'
+              }}>
+                {fullShortcut.ctrlKey && 'Ctrl+'}
+                {fullShortcut.shiftKey && 'Shift+'}
+                {fullShortcut.altKey && 'Alt+'}
+                {shortcut.key === ' ' ? 'Space' : shortcut.key}
+              </kbd>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

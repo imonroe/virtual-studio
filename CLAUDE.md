@@ -139,6 +139,31 @@ import type { StudioConfig } from '@/types/studio';
 - Scene cleanup is critical - dispose of geometries, materials, and textures
 - Use adaptive quality based on performance metrics
 
+## React Hooks and Event Handling
+
+### Keyboard Shortcuts Debugging (September 5, 2025)
+
+**Problem**: Keyboard shortcuts not responding (GitHub Issue #9)
+**Root Cause**: Multiple event listeners and missing visual feedback
+
+**Solution Process**:
+1. **Added comprehensive logging** to trace event flow
+2. **Fixed duplicate listeners** - Only initialize `useKeyboardShortcuts()` in App.tsx, not ControlPanel
+3. **Added visual notifications** - Real-time feedback when shortcuts activate
+4. **Enhanced TypeScript interfaces** - Better type safety for event handling
+
+**Key Lessons**:
+- **Single Hook Initialization**: React hooks with document-level event listeners should only be called once
+- **Visual Feedback Critical**: Invisible actions like keyboard shortcuts need immediate user confirmation
+- **Event Parameter Passing**: Allow shortcut actions to receive the original KeyboardEvent for advanced handling
+- **Systematic Debugging**: Use logging and visual cues to identify where complex event flows break down
+
+**Keyboard Shortcuts Fixed**:
+- `0-4`: Toggle various studio elements
+- `Tab`: Toggle Control Panel  
+- `p`: Toggle Preview Mode
+- `Escape`: Hide All Overlays
+
 ## Build System Troubleshooting
 
 ### Common Build Issues

@@ -6,7 +6,7 @@ import { OverlayControls } from './panels/OverlayControls';
 import { PresetControls } from './panels/PresetControls';
 import { StorageControls } from './panels/StorageControls';
 import { BrandingControls } from './panels/BrandingControls';
-import { useKeyboardShortcuts, KeyboardShortcutsHelp } from '@services/shortcuts/KeyboardShortcuts';
+import { KeyboardShortcutsHelp } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
 import './ControlPanel.css';
 
@@ -32,7 +32,17 @@ export const ControlPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('background');
   const controlPanelOpen = useStudioStore((state) => state.controlPanelOpen);
   const toggleControlPanel = useStudioStore((state) => state.toggleControlPanel);
-  const { shortcuts } = useKeyboardShortcuts();
+  // Shortcuts for display in help panel (not functional, just for UI)
+  const shortcuts = [
+    { key: '0', description: 'Toggle Background' },
+    { key: '1', description: 'Toggle Clock' },
+    { key: '2', description: 'Toggle Live Indicator' },
+    { key: '3', description: 'Toggle Lower Third' },
+    { key: '4', description: 'Toggle Ticker' },
+    { key: 'Tab', description: 'Toggle Control Panel' },
+    { key: 'p', description: 'Toggle Preview Mode' },
+    { key: 'Escape', description: 'Hide All Overlays' }
+  ];
 
   const renderTabContent = () => {
     switch (activeTab) {

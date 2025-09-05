@@ -29,7 +29,8 @@ function App() {
   const logos = useStudioStore((state) => state.logos);
 
   // Initialize keyboard shortcuts
-  useKeyboardShortcuts();
+  const { shortcuts } = useKeyboardShortcuts();
+  console.log('🎹 App: Keyboard shortcuts loaded:', shortcuts.length);
 
   useEffect(() => {
     const initEngine = async () => {
