@@ -347,3 +347,52 @@ For comprehensive runtime verification without browser automation:
 - **Incremental testing**: Fix one component at a time, test after each fix
 - **CSS debugging**: Use browser dev tools to verify variable resolution
 - **State debugging**: Use Zustand devtools for state management verification
+
+### Date/Time Overlay System Implementation (September 5, 2025)
+
+**Context**: GitHub Issue #6 - Add date overlay functionality to complement the existing clock display
+
+**Key Implementation Lessons:**
+
+#### Progressive Enhancement Approach
+- **Start simple, iterate based on feedback**: Initial implementation only added date to existing clock, evolved to flexible date/time system
+- **User-driven requirements**: "Show JUST the date without time" led to complete interface redesign with separate toggles
+- **Backward compatibility**: Extended existing Clock interface without breaking existing functionality
+
+#### Conditional UI Design Patterns
+- **Smart layout adaptation**: Interface controls only show relevant options (date format only when date enabled)
+- **Dynamic positioning calculations**: Element size estimates change based on what's being displayed (date-only vs time-only vs both)
+- **Progressive disclosure**: Advanced controls revealed conditionally to reduce cognitive load
+
+#### State Management Best Practices
+- **Extend existing types thoughtfully**: Added `showTime: boolean` and `showDate: boolean` to Clock interface
+- **Provide sensible defaults**: `showTime: true, showDate: false` maintains existing behavior
+- **Consider all display states**: Empty state handling when neither date nor time are selected
+
+#### React Rendering Patterns
+- **Conditional fragments**: Use `{condition && <element />}` for clean conditional rendering
+- **Dynamic styling**: Adjust font sizes and spacing based on content (date text 20% smaller than time)
+- **Layout spacing**: Add margins between elements only when both are visible
+
+#### User Experience Insights
+- **Clear labeling**: "Date/Time" section name better describes flexible functionality than "Clock"
+- **Quick presets**: Provide common layouts as one-click buttons (Top Left with both, Top Right date-only, etc.)
+- **Responsive positioning**: Calculate max slider values based on actual stage dimensions and element sizes
+
+#### Technical Implementation Details
+```typescript
+// Smart element size calculation for positioning limits
+const getPositioningLimits = () => {
+  let clockElementWidth = 0;
+  let clockElementHeight = 0;
+  
+  if (clock.showDate && clock.showTime) {
+    clockElementHeight = (clock.style.fontSize * 1.2) + (clock.style.fontSize * 0.8 * 1.2) + 4;
+  } else if (clock.showDate || clock.showTime) {
+    clockElementHeight = clock.style.fontSize * 1.2;
+  }
+  // ... more calculations
+};
+```
+
+**Result**: Successfully transformed basic clock into flexible Date/Time overlay system addressing user's evolving requirements while maintaining intuitive controls.

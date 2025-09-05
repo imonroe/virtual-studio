@@ -62,9 +62,12 @@ export interface Ticker {
 
 export interface Clock {
   visible: boolean;
+  showTime: boolean;
   format: '12h' | '24h';
   timezone: string;
   showSeconds: boolean;
+  showDate: boolean;
+  dateFormat: 'short' | 'medium' | 'long';
   position: { x: number; y: number };
   style: {
     color: string;

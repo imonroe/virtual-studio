@@ -228,21 +228,56 @@ function App() {
           />
 
           <div className="studio-overlay">
-            {clock.visible && (
+            {clock.visible && (clock.showDate || clock.showTime) && (
               <div className="clock" style={{
                 position: 'absolute',
                 left: `${clock.position.x}px`,
                 top: `${clock.position.y}px`,
                 color: clock.style.color,
                 fontSize: `${clock.style.fontSize}px`,
-                fontFamily: clock.style.fontFamily
+                fontFamily: clock.style.fontFamily,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start'
               }}>
-                {currentTime.toLocaleTimeString([], {
-                  hour12: clock.format === '12h',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: clock.showSeconds ? '2-digit' : undefined
-                })}
+                {clock.showDate && (
+                  <div className="date" style={{ 
+                    fontSize: `${clock.style.fontSize * 0.8}px`,
+                    opacity: 0.9,
+                    marginBottom: clock.showTime ? '4px' : '0'
+                  }}>
+                    {currentTime.toLocaleDateString([], {
+                      timeZone: clock.timezone,
+                      ...(clock.dateFormat === 'short' && { 
+                        month: 'numeric', 
+                        day: 'numeric', 
+                        year: '2-digit' 
+                      }),
+                      ...(clock.dateFormat === 'medium' && { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      }),
+                      ...(clock.dateFormat === 'long' && { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })
+                    })}
+                  </div>
+                )}
+                {clock.showTime && (
+                  <div className="time">
+                    {currentTime.toLocaleTimeString([], {
+                      timeZone: clock.timezone,
+                      hour12: clock.format === '12h',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: clock.showSeconds ? '2-digit' : undefined
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

@@ -95,9 +95,12 @@ const defaultBackground: StudioBackground = {
 
 const defaultClock: Clock = {
   visible: false,
+  showTime: true,
   format: '12h',
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   showSeconds: true,
+  showDate: false,
+  dateFormat: 'short',
   position: { x: 20, y: 20 },
   style: {
     color: '#ffffff',

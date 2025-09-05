@@ -41,8 +41,30 @@ export const OverlayControls: React.FC = () => {
   // Calculate positioning limits accounting for element size
   const getPositioningLimits = () => {
     // Estimate element dimensions for positioning limits
-    const clockElementWidth = clock.style.fontSize * 4; // Approx 4 characters wide (HH:MM)
-    const clockElementHeight = clock.style.fontSize * 1.2; // Account for padding
+    let clockElementWidth = 0;
+    let clockElementHeight = 0;
+    
+    // Calculate width based on what's being displayed
+    if (clock.showDate && clock.showTime) {
+      // Both date and time - use the wider of the two
+      clockElementWidth = clock.style.fontSize * (clock.dateFormat === 'long' ? 6 : 4);
+    } else if (clock.showDate) {
+      // Date only
+      clockElementWidth = clock.style.fontSize * (clock.dateFormat === 'long' ? 6 : 4);
+    } else if (clock.showTime) {
+      // Time only
+      clockElementWidth = clock.style.fontSize * 4; // Approx 4 characters wide (HH:MM)
+    }
+    
+    // Calculate height based on what's being displayed
+    if (clock.showDate && clock.showTime) {
+      // Both date and time
+      clockElementHeight = (clock.style.fontSize * 1.2) + (clock.style.fontSize * 0.8 * 1.2) + 4; // Time + date + margin
+    } else if (clock.showDate || clock.showTime) {
+      // Either date only or time only
+      clockElementHeight = clock.style.fontSize * 1.2;
+    }
+    
     const liveIndicatorWidth = 80; // Approximate width of "LIVE" indicator
     const liveIndicatorHeight = 30; // Approximate height including padding
     
@@ -62,11 +84,11 @@ export const OverlayControls: React.FC = () => {
 
   return (
     <div className="control-section">
-      <h3>Clock & Indicators</h3>
+      <h3>Date/Time & Indicators</h3>
       
-      {/* Clock Controls */}
+      {/* Date/Time Controls */}
       <div className="control-group">
-        <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '14px' }}>Clock</h4>
+        <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '14px' }}>Date/Time</h4>
         
         <div className="control-checkbox">
           <input
@@ -75,13 +97,52 @@ export const OverlayControls: React.FC = () => {
             checked={clock.visible}
             onChange={toggleClock}
           />
-          <label htmlFor="clockVisible">Show Clock</label>
+          <label htmlFor="clockVisible">Show Date/Time Overlay</label>
         </div>
 
         {clock.visible && (
           <>
+            <div className="control-checkbox">
+              <input
+                type="checkbox"
+                id="showDate"
+                checked={clock.showDate}
+                onChange={(e) => setClock({ showDate: e.target.checked })}
+              />
+              <label htmlFor="showDate">Show Date</label>
+            </div>
+
+            <div className="control-checkbox">
+              <input
+                type="checkbox"
+                id="showTime"
+                checked={clock.showTime}
+                onChange={(e) => setClock({ showTime: e.target.checked })}
+              />
+              <label htmlFor="showTime">Show Time</label>
+            </div>
+          </>
+        )}
+
+        {clock.visible && clock.showDate && (
+          <div style={{ marginBottom: '12px' }}>
+            <label className="control-label">Date Format</label>
+            <select
+              className="control-select"
+              value={clock.dateFormat}
+              onChange={(e) => setClock({ dateFormat: e.target.value as 'short' | 'medium' | 'long' })}
+            >
+              <option value="short">Short (12/25/24)</option>
+              <option value="medium">Medium (Wed, Dec 25)</option>
+              <option value="long">Long (Wednesday, December 25, 2024)</option>
+            </select>
+          </div>
+        )}
+
+        {clock.visible && clock.showTime && (
+          <>
             <div style={{ marginBottom: '12px' }}>
-              <label className="control-label">Format</label>
+              <label className="control-label">Time Format</label>
               <select
                 className="control-select"
                 value={clock.format}
@@ -101,7 +162,11 @@ export const OverlayControls: React.FC = () => {
               />
               <label htmlFor="showSeconds">Show Seconds</label>
             </div>
+          </>
+        )}
 
+        {clock.visible && (clock.showDate || clock.showTime) && (
+          <>
             <div style={{ marginBottom: '12px' }}>
               <label className="control-label">Timezone</label>
               <select
@@ -283,24 +348,30 @@ export const OverlayControls: React.FC = () => {
             onClick={() => {
               setClock({ 
                 visible: true,
+                showTime: true,
+                showDate: true,
+                dateFormat: 'medium',
                 position: { x: 20, y: 20 },
                 style: { ...clock.style, fontSize: 24 }
               });
               setLiveIndicator({ 
                 visible: true,
-                position: { x: 20, y: 60 },
+                position: { x: 20, y: 80 }, // Adjusted for date+time display
                 color: '#ff0000'
               });
             }}
           >
-            Top Left Layout
+            Top Left (Date & Time)
           </button>
           <button
             className="control-button"
             onClick={() => {
               setClock({ 
                 visible: true,
-                position: { x: Math.max(0, stageDimensions.width - 200), y: 20 },
+                showTime: false,
+                showDate: true,
+                dateFormat: 'long',
+                position: { x: Math.max(0, stageDimensions.width - 250), y: 20 },
                 style: { ...clock.style, fontSize: 20 }
               });
               setLiveIndicator({ 
@@ -310,7 +381,26 @@ export const OverlayControls: React.FC = () => {
               });
             }}
           >
-            Top Right Layout
+            Top Right (Date Only)
+          </button>
+          <button
+            className="control-button"
+            onClick={() => {
+              setClock({ 
+                visible: true,
+                showTime: true,
+                showDate: false,
+                position: { x: Math.max(0, stageDimensions.width - 150), y: 20 },
+                style: { ...clock.style, fontSize: 20 }
+              });
+              setLiveIndicator({ 
+                visible: true,
+                position: { x: Math.max(0, stageDimensions.width - 150), y: 50 },
+                color: '#0066ff'
+              });
+            }}
+          >
+            Top Right (Time Only)
           </button>
           <button
             className="control-button"

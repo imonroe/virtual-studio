@@ -13,7 +13,7 @@ A high-performance, browser-based broadcast graphics application designed for co
 ### 📺 Broadcast Graphics
 - **Lower Thirds**: Customizable name and title overlays with multiple animation styles
 - **Ticker Tape**: Scrolling news ticker with customizable content and speed
-- **Live Clock**: Real-time clock display with timezone support and custom formatting
+- **Date/Time Overlay**: Flexible real-time display with options for date-only, time-only, or combined display with timezone support
 - **Live Indicator**: Animated "LIVE" indicator with blinking effects
 
 ### 🎛️ Real-time Controls
