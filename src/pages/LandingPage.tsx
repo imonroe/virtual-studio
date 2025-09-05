@@ -10,7 +10,7 @@ export const LandingPage: React.FC = () => {
         <header className="hero-section">
           <div className="hero-content">
             <h1 className="hero-title">
-              <span className="gradient-text">Virtual Studio</span>
+              <span className="gradient-text">Virtual Video Studio</span>
             </h1>
             <p className="hero-subtitle">
               Professional broadcast graphics for content creators
