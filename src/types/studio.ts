@@ -24,7 +24,7 @@ export interface ImageConfig {
 }
 
 export interface AnimatedConfig {
-  variant: 'particles' | 'waves';
+  variant: 'particles' | 'waves' | 'neural';
   particles?: {
     count: number;
     color: string;
@@ -41,6 +41,21 @@ export interface AnimatedConfig {
       highlight: string; // #00f5ff
     };
     edgeCoverage: { top: number; bottom: number };
+    quality: 'auto' | 'low' | 'medium' | 'high';
+  };
+  neural?: {
+    nodeCount: number; // 15-45 nodes
+    nodeSize: number; // Node circle radius in pixels
+    connectionDensity: number; // 0.2-0.8, controls network connectivity
+    dataFlowSpeed: number; // 0.1-2.0, data packet travel speed
+    packetCount: number; // 10-50, simultaneous traveling packets
+    colors: {
+      background: string; // Deep blue #1a1a2e
+      nodeCore: string; // Accent blue #646cff  
+      nodeGlow: string; // Cyan highlights #00f5ff
+      connection: string; // Connection lines #646cff + alpha
+      packet: string; // Data packet color #00f5ff
+    };
     quality: 'auto' | 'low' | 'medium' | 'high';
   };
   backgroundGradient?: GradientConfig;

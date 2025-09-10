@@ -69,26 +69,50 @@ export const BackgroundControls: React.FC = () => {
     });
   };
 
-  const switchToAnimated = () => {
-    setBackground({
-      type: 'animated',
-      config: {
-        variant: 'waves',
-        waves: {
-          count: 4,
-          frequencies: [1.0, 1.5, 2.0, 2.5],
-          amplitudes: [0.5, 0.3, 0.4, 0.2],
-          speed: 1.0,
-          colors: {
-            primary: '#646cff',
-            secondary: '#8b5cf6',
-            highlight: '#00f5ff'
-          },
-          edgeCoverage: { top: 0.1, bottom: 0.15 },
-          quality: 'auto'
+  const switchToAnimated = (variant: 'waves' | 'neural' = 'waves') => {
+    if (variant === 'neural') {
+      setBackground({
+        type: 'animated',
+        config: {
+          variant: 'neural',
+          neural: {
+            nodeCount: 25,
+            nodeSize: 8,
+            connectionDensity: 0.4,
+            dataFlowSpeed: 1.0,
+            packetCount: 20,
+            colors: {
+              background: '#1a1a2e',
+              nodeCore: '#646cff',
+              nodeGlow: '#00f5ff',
+              connection: '#646cff',
+              packet: '#00f5ff'
+            },
+            quality: 'auto'
+          }
         }
-      }
-    });
+      });
+    } else {
+      setBackground({
+        type: 'animated',
+        config: {
+          variant: 'waves',
+          waves: {
+            count: 4,
+            frequencies: [1.0, 1.5, 2.0, 2.5],
+            amplitudes: [0.5, 0.3, 0.4, 0.2],
+            speed: 1.0,
+            colors: {
+              primary: '#646cff',
+              secondary: '#8b5cf6',
+              highlight: '#00f5ff'
+            },
+            edgeCoverage: { top: 0.1, bottom: 0.15 },
+            quality: 'auto'
+          }
+        }
+      });
+    }
   };
 
   const switchToImage = () => {
@@ -196,10 +220,16 @@ export const BackgroundControls: React.FC = () => {
             Solid
           </button>
           <button
-            className={`control-button ${isAnimated ? 'active' : ''}`}
-            onClick={switchToAnimated}
+            className={`control-button ${isAnimated && animatedConfig?.variant === 'waves' ? 'active' : ''}`}
+            onClick={() => switchToAnimated('waves')}
           >
-            Animated
+            Waves
+          </button>
+          <button
+            className={`control-button ${isAnimated && animatedConfig?.variant === 'neural' ? 'active' : ''}`}
+            onClick={() => switchToAnimated('neural')}
+          >
+            Neural
           </button>
           <button
             className={`control-button ${isImage ? 'active' : ''}`}
@@ -261,6 +291,195 @@ export const BackgroundControls: React.FC = () => {
                 onClick={() => updateSolidConfig({ color: '#ffffff' })}
               >
                 Pure White
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isAnimated && animatedConfig?.variant === 'neural' && (
+        <>
+          <div className="control-group">
+            <label className="control-label">Network Density: {animatedConfig.neural?.nodeCount || 25} nodes</label>
+            <input
+              type="range"
+              className="control-input"
+              min="15"
+              max="45"
+              value={animatedConfig.neural?.nodeCount || 25}
+              onChange={(e) => updateAnimatedConfig({
+                neural: { 
+                  ...animatedConfig.neural!, 
+                  nodeCount: Number(e.target.value) 
+                }
+              })}
+            />
+          </div>
+
+          <div className="control-group">
+            <label className="control-label">Data Flow Speed: {animatedConfig.neural?.dataFlowSpeed || 1.0}x</label>
+            <input
+              type="range"
+              className="control-input"
+              min="0.1"
+              max="2.0"
+              step="0.1"
+              value={animatedConfig.neural?.dataFlowSpeed || 1.0}
+              onChange={(e) => updateAnimatedConfig({
+                neural: { 
+                  ...animatedConfig.neural!, 
+                  dataFlowSpeed: Number(e.target.value) 
+                }
+              })}
+            />
+          </div>
+
+          <div className="control-group">
+            <label className="control-label">Connection Density: {Math.round((animatedConfig.neural?.connectionDensity || 0.4) * 100)}%</label>
+            <input
+              type="range"
+              className="control-input"
+              min="0.2"
+              max="0.8"
+              step="0.1"
+              value={animatedConfig.neural?.connectionDensity || 0.4}
+              onChange={(e) => updateAnimatedConfig({
+                neural: { 
+                  ...animatedConfig.neural!, 
+                  connectionDensity: Number(e.target.value) 
+                }
+              })}
+            />
+          </div>
+
+          <div className="control-group">
+            <label className="control-label">Neural Network Colors</label>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '12px', color: '#aaa', minWidth: '80px' }}>Node Core:</label>
+              <input
+                type="color"
+                value={animatedConfig.neural?.colors.nodeCore || '#646cff'}
+                onChange={(e) => updateAnimatedConfig({
+                  neural: { 
+                    ...animatedConfig.neural!, 
+                    colors: { 
+                      ...animatedConfig.neural!.colors, 
+                      nodeCore: e.target.value 
+                    }
+                  }
+                })}
+              />
+            </div>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '12px', color: '#aaa', minWidth: '80px' }}>Node Glow:</label>
+              <input
+                type="color"
+                value={animatedConfig.neural?.colors.nodeGlow || '#00f5ff'}
+                onChange={(e) => updateAnimatedConfig({
+                  neural: { 
+                    ...animatedConfig.neural!, 
+                    colors: { 
+                      ...animatedConfig.neural!.colors, 
+                      nodeGlow: e.target.value 
+                    }
+                  }
+                })}
+              />
+            </div>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '12px', color: '#aaa', minWidth: '80px' }}>Data Packet:</label>
+              <input
+                type="color"
+                value={animatedConfig.neural?.colors.packet || '#00f5ff'}
+                onChange={(e) => updateAnimatedConfig({
+                  neural: { 
+                    ...animatedConfig.neural!, 
+                    colors: { 
+                      ...animatedConfig.neural!.colors, 
+                      packet: e.target.value 
+                    }
+                  }
+                })}
+              />
+            </div>
+          </div>
+
+          <div className="control-group">
+            <h4 style={{ margin: '16px 0 8px 0', color: '#ccc', fontSize: '12px' }}>
+              Neural Network Presets
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  neural: {
+                    ...animatedConfig.neural!,
+                    colors: {
+                      background: '#1a1a2e',
+                      nodeCore: '#646cff',
+                      nodeGlow: '#00f5ff',
+                      connection: '#646cff',
+                      packet: '#00f5ff'
+                    },
+                    dataFlowSpeed: 1.0
+                  }
+                })}
+              >
+                AI Blue
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  neural: {
+                    ...animatedConfig.neural!,
+                    colors: {
+                      background: '#2d1b69',
+                      nodeCore: '#8b5cf6',
+                      nodeGlow: '#a855f7',
+                      connection: '#8b5cf6',
+                      packet: '#c084fc'
+                    },
+                    dataFlowSpeed: 0.8
+                  }
+                })}
+              >
+                Deep Purple
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  neural: {
+                    ...animatedConfig.neural!,
+                    colors: {
+                      background: '#0c4a6e',
+                      nodeCore: '#0ea5e9',
+                      nodeGlow: '#38bdf8',
+                      connection: '#0ea5e9',
+                      packet: '#7dd3fc'
+                    },
+                    dataFlowSpeed: 1.2
+                  }
+                })}
+              >
+                Cyber Blue
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  neural: {
+                    ...animatedConfig.neural!,
+                    colors: {
+                      background: '#064e3b',
+                      nodeCore: '#10b981',
+                      nodeGlow: '#34d399',
+                      connection: '#10b981',
+                      packet: '#6ee7b7'
+                    },
+                    dataFlowSpeed: 1.5
+                  }
+                })}
+              >
+                Matrix Green
               </button>
             </div>
           </div>

@@ -3,10 +3,12 @@ import { RenderingEngine } from '@engine/RenderingEngine';
 import { GradientBackground } from '@studio/backgrounds/GradientBackground';
 import { SolidBackground } from '@studio/backgrounds/SolidBackground';
 import { WavesBackground } from '@studio/backgrounds/WavesBackground';
+import { NeuralNetworkBackground } from '@studio/backgrounds/NeuralNetworkBackground';
 import { ImageBackground } from '@studio/backgrounds/ImageBackground';
 import { CSSGradientBackground } from '@studio/backgrounds/CSSGradientBackground';
 import { CSSSolidBackground } from '@studio/backgrounds/CSSSolidBackground';
 import { CSSWavesBackground } from '@studio/backgrounds/CSSWavesBackground';
+import { CSSNeuralNetworkBackground } from '@studio/backgrounds/CSSNeuralNetworkBackground';
 import { CSSImageBackground } from '@studio/backgrounds/CSSImageBackground';
 import { LowerThird } from '@studio/graphics/LowerThird';
 import { Ticker } from '@studio/graphics/Ticker';
@@ -23,6 +25,7 @@ export function Studio() {
   const gradientBackgroundRef = useRef<GradientBackground | null>(null);
   const solidBackgroundRef = useRef<SolidBackground | null>(null);
   const wavesBackgroundRef = useRef<WavesBackground | null>(null);
+  const neuralBackgroundRef = useRef<NeuralNetworkBackground | null>(null);
   const imageBackgroundRef = useRef<ImageBackground | null>(null);
   const [renderMode, setRenderMode] = useState<'webgl' | 'css' | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -74,11 +77,20 @@ export function Studio() {
                 scene.add(mesh);
                 console.log('WebGL solid background added to scene', mesh);
               } else if (background.type === 'animated') {
-                // Create animated background (waves)
-                wavesBackgroundRef.current = new WavesBackground(background.config as AnimatedConfig);
-                const mesh = wavesBackgroundRef.current.create();
-                scene.add(mesh);
-                console.log('WebGL animated background added to scene', mesh);
+                const animatedConfig = background.config as AnimatedConfig;
+                if (animatedConfig.variant === 'neural') {
+                  // Create neural network background
+                  neuralBackgroundRef.current = new NeuralNetworkBackground(animatedConfig);
+                  const group = neuralBackgroundRef.current.create();
+                  scene.add(group);
+                  console.log('WebGL neural network background added to scene', group);
+                } else {
+                  // Create waves background
+                  wavesBackgroundRef.current = new WavesBackground(animatedConfig);
+                  const mesh = wavesBackgroundRef.current.create();
+                  scene.add(mesh);
+                  console.log('WebGL waves background added to scene', mesh);
+                }
               } else if (background.type === 'image') {
                 // Create image background
                 imageBackgroundRef.current = new ImageBackground(background.config as ImageConfig);
@@ -108,6 +120,9 @@ export function Studio() {
           }
           if (wavesBackgroundRef.current) {
             wavesBackgroundRef.current.update(deltaTime);
+          }
+          if (neuralBackgroundRef.current) {
+            neuralBackgroundRef.current.update(deltaTime);
           }
           if (imageBackgroundRef.current) {
             imageBackgroundRef.current.update(deltaTime);
@@ -141,6 +156,10 @@ export function Studio() {
         wavesBackgroundRef.current.dispose();
         wavesBackgroundRef.current = null;
       }
+      if (neuralBackgroundRef.current) {
+        neuralBackgroundRef.current.dispose();
+        neuralBackgroundRef.current = null;
+      }
       if (imageBackgroundRef.current) {
         imageBackgroundRef.current.dispose();
         imageBackgroundRef.current = null;
@@ -154,8 +173,13 @@ export function Studio() {
       gradientBackgroundRef.current.updateConfig(background.config as GradientConfig);
     } else if (solidBackgroundRef.current && background.type === 'solid') {
       solidBackgroundRef.current.updateConfig(background.config as SolidConfig);
-    } else if (wavesBackgroundRef.current && background.type === 'animated') {
-      wavesBackgroundRef.current.updateConfig(background.config as AnimatedConfig);
+    } else if (background.type === 'animated') {
+      const animatedConfig = background.config as AnimatedConfig;
+      if (animatedConfig.variant === 'neural' && neuralBackgroundRef.current) {
+        neuralBackgroundRef.current.updateConfig(animatedConfig);
+      } else if (animatedConfig.variant === 'waves' && wavesBackgroundRef.current) {
+        wavesBackgroundRef.current.updateConfig(animatedConfig);
+      }
     } else if (imageBackgroundRef.current && background.type === 'image') {
       imageBackgroundRef.current.updateConfig(background.config as ImageConfig);
     }
@@ -194,6 +218,13 @@ export function Studio() {
         wavesBackgroundRef.current = null;
       }
       
+      if (neuralBackgroundRef.current) {
+        const group = neuralBackgroundRef.current.getGroup();
+        if (group) scene.remove(group);
+        neuralBackgroundRef.current.dispose();
+        neuralBackgroundRef.current = null;
+      }
+      
       if (imageBackgroundRef.current) {
         const mesh = imageBackgroundRef.current.getMesh();
         if (mesh) scene.remove(mesh);
@@ -219,10 +250,18 @@ export function Studio() {
         scene.add(mesh);
         console.log('Switched to solid background');
       } else if (background.type === 'animated') {
-        wavesBackgroundRef.current = new WavesBackground(background.config as AnimatedConfig);
-        const mesh = wavesBackgroundRef.current.create();
-        scene.add(mesh);
-        console.log('Switched to animated background');
+        const animatedConfig = background.config as AnimatedConfig;
+        if (animatedConfig.variant === 'neural') {
+          neuralBackgroundRef.current = new NeuralNetworkBackground(animatedConfig);
+          const group = neuralBackgroundRef.current.create();
+          scene.add(group);
+          console.log('Switched to neural network background');
+        } else {
+          wavesBackgroundRef.current = new WavesBackground(animatedConfig);
+          const mesh = wavesBackgroundRef.current.create();
+          scene.add(mesh);
+          console.log('Switched to waves background');
+        }
       } else if (background.type === 'image') {
         console.log('Using CSS image background instead of WebGL to avoid conflicts');
         // Skip WebGL image background creation - use CSS instead
@@ -242,6 +281,9 @@ export function Studio() {
     }
     if (wavesBackgroundRef.current) {
       wavesBackgroundRef.current.setVisible(background.visible);
+    }
+    if (neuralBackgroundRef.current) {
+      neuralBackgroundRef.current.setVisible(background.visible);
     }
     if (imageBackgroundRef.current) {
       imageBackgroundRef.current.setVisible(background.visible);
@@ -282,8 +324,13 @@ export function Studio() {
           )}
           
           {/* CSS Animated Background - use CSS for animated backgrounds like gradients do */}
-          {background.visible && background.type === 'animated' && (
+          {background.visible && background.type === 'animated' && background.config && (background.config as AnimatedConfig).variant === 'waves' && (
             <CSSWavesBackground config={background.config as AnimatedConfig} />
+          )}
+          
+          {/* CSS Neural Network Background - fallback for neural networks */}
+          {background.visible && background.type === 'animated' && background.config && (background.config as AnimatedConfig).variant === 'neural' && (
+            <CSSNeuralNetworkBackground config={background.config as AnimatedConfig} />
           )}
           
           {/* CSS Image Background - always use CSS for images to avoid WebGL conflicts */}
