@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { RenderingEngine } from '@engine/RenderingEngine';
 import { GradientBackground } from '@studio/backgrounds/GradientBackground';
 import { SolidBackground } from '@studio/backgrounds/SolidBackground';
+import { WavesBackground } from '@studio/backgrounds/WavesBackground';
 import { ImageBackground } from '@studio/backgrounds/ImageBackground';
 import { CSSGradientBackground } from '@studio/backgrounds/CSSGradientBackground';
 import { CSSSolidBackground } from '@studio/backgrounds/CSSSolidBackground';
+import { CSSWavesBackground } from '@studio/backgrounds/CSSWavesBackground';
 import { CSSImageBackground } from '@studio/backgrounds/CSSImageBackground';
 import { LowerThird } from '@studio/graphics/LowerThird';
 import { Ticker } from '@studio/graphics/Ticker';
@@ -12,7 +14,7 @@ import { Logo } from '@studio/graphics/Logo';
 import { ControlPanel } from '@controls/ControlPanel';
 import { useKeyboardShortcuts } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig, SolidConfig, ImageConfig } from '@/types/studio';
+import type { GradientConfig, SolidConfig, AnimatedConfig, ImageConfig } from '@/types/studio';
 import './Studio.css';
 
 export function Studio() {
@@ -20,6 +22,7 @@ export function Studio() {
   const engineRef = useRef<RenderingEngine | null>(null);
   const gradientBackgroundRef = useRef<GradientBackground | null>(null);
   const solidBackgroundRef = useRef<SolidBackground | null>(null);
+  const wavesBackgroundRef = useRef<WavesBackground | null>(null);
   const imageBackgroundRef = useRef<ImageBackground | null>(null);
   const [renderMode, setRenderMode] = useState<'webgl' | 'css' | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -70,6 +73,12 @@ export function Studio() {
                 const mesh = solidBackgroundRef.current.create();
                 scene.add(mesh);
                 console.log('WebGL solid background added to scene', mesh);
+              } else if (background.type === 'animated') {
+                // Create animated background (waves)
+                wavesBackgroundRef.current = new WavesBackground(background.config as AnimatedConfig);
+                const mesh = wavesBackgroundRef.current.create();
+                scene.add(mesh);
+                console.log('WebGL animated background added to scene', mesh);
               } else if (background.type === 'image') {
                 // Create image background
                 imageBackgroundRef.current = new ImageBackground(background.config as ImageConfig);
@@ -96,6 +105,9 @@ export function Studio() {
           }
           if (solidBackgroundRef.current) {
             solidBackgroundRef.current.update(deltaTime);
+          }
+          if (wavesBackgroundRef.current) {
+            wavesBackgroundRef.current.update(deltaTime);
           }
           if (imageBackgroundRef.current) {
             imageBackgroundRef.current.update(deltaTime);
@@ -125,6 +137,10 @@ export function Studio() {
         solidBackgroundRef.current.dispose();
         solidBackgroundRef.current = null;
       }
+      if (wavesBackgroundRef.current) {
+        wavesBackgroundRef.current.dispose();
+        wavesBackgroundRef.current = null;
+      }
       if (imageBackgroundRef.current) {
         imageBackgroundRef.current.dispose();
         imageBackgroundRef.current = null;
@@ -138,6 +154,8 @@ export function Studio() {
       gradientBackgroundRef.current.updateConfig(background.config as GradientConfig);
     } else if (solidBackgroundRef.current && background.type === 'solid') {
       solidBackgroundRef.current.updateConfig(background.config as SolidConfig);
+    } else if (wavesBackgroundRef.current && background.type === 'animated') {
+      wavesBackgroundRef.current.updateConfig(background.config as AnimatedConfig);
     } else if (imageBackgroundRef.current && background.type === 'image') {
       imageBackgroundRef.current.updateConfig(background.config as ImageConfig);
     }
@@ -169,6 +187,13 @@ export function Studio() {
         solidBackgroundRef.current = null;
       }
       
+      if (wavesBackgroundRef.current) {
+        const mesh = wavesBackgroundRef.current.getMesh();
+        if (mesh) scene.remove(mesh);
+        wavesBackgroundRef.current.dispose();
+        wavesBackgroundRef.current = null;
+      }
+      
       if (imageBackgroundRef.current) {
         const mesh = imageBackgroundRef.current.getMesh();
         if (mesh) scene.remove(mesh);
@@ -193,6 +218,11 @@ export function Studio() {
         const mesh = solidBackgroundRef.current.create();
         scene.add(mesh);
         console.log('Switched to solid background');
+      } else if (background.type === 'animated') {
+        wavesBackgroundRef.current = new WavesBackground(background.config as AnimatedConfig);
+        const mesh = wavesBackgroundRef.current.create();
+        scene.add(mesh);
+        console.log('Switched to animated background');
       } else if (background.type === 'image') {
         console.log('Using CSS image background instead of WebGL to avoid conflicts');
         // Skip WebGL image background creation - use CSS instead
@@ -209,6 +239,9 @@ export function Studio() {
     }
     if (solidBackgroundRef.current) {
       solidBackgroundRef.current.setVisible(background.visible);
+    }
+    if (wavesBackgroundRef.current) {
+      wavesBackgroundRef.current.setVisible(background.visible);
     }
     if (imageBackgroundRef.current) {
       imageBackgroundRef.current.setVisible(background.visible);
@@ -246,6 +279,11 @@ export function Studio() {
           {/* CSS Solid Background - use CSS for solid colors to avoid WebGL complexity */}
           {background.visible && background.type === 'solid' && (
             <CSSSolidBackground config={background.config as SolidConfig} />
+          )}
+          
+          {/* CSS Animated Background - use CSS for animated backgrounds like gradients do */}
+          {background.visible && background.type === 'animated' && (
+            <CSSWavesBackground config={background.config as AnimatedConfig} />
           )}
           
           {/* CSS Image Background - always use CSS for images to avoid WebGL conflicts */}

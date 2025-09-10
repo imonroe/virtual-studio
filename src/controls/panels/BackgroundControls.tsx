@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig, ImageConfig, SolidConfig } from '@/types/studio';
+import type { GradientConfig, ImageConfig, SolidConfig, AnimatedConfig } from '@/types/studio';
 
 export const BackgroundControls: React.FC = () => {
   const background = useStudioStore((state) => state.background);
@@ -11,10 +11,12 @@ export const BackgroundControls: React.FC = () => {
 
   const isGradient = background.type === 'gradient';
   const isSolid = background.type === 'solid';
+  const isAnimated = background.type === 'animated';
   const isImage = background.type === 'image';
   
   const gradientConfig = isGradient ? background.config as GradientConfig : null;
   const solidConfig = isSolid ? background.config as SolidConfig : null;
+  const animatedConfig = isAnimated ? background.config as AnimatedConfig : null;
   const imageConfig = isImage ? background.config as ImageConfig : null;
 
   const updateGradientConfig = (updates: Partial<GradientConfig>) => {
@@ -28,6 +30,13 @@ export const BackgroundControls: React.FC = () => {
     if (!solidConfig) return;
     setBackground({
       config: { ...solidConfig, ...updates }
+    });
+  };
+
+  const updateAnimatedConfig = (updates: Partial<AnimatedConfig>) => {
+    if (!animatedConfig) return;
+    setBackground({
+      config: { ...animatedConfig, ...updates }
     });
   };
 
@@ -56,6 +65,28 @@ export const BackgroundControls: React.FC = () => {
       type: 'solid',
       config: {
         color: '#00ff00' // Default to chroma key green
+      }
+    });
+  };
+
+  const switchToAnimated = () => {
+    setBackground({
+      type: 'animated',
+      config: {
+        variant: 'waves',
+        waves: {
+          count: 4,
+          frequencies: [1.0, 1.5, 2.0, 2.5],
+          amplitudes: [0.5, 0.3, 0.4, 0.2],
+          speed: 1.0,
+          colors: {
+            primary: '#646cff',
+            secondary: '#8b5cf6',
+            highlight: '#00f5ff'
+          },
+          edgeCoverage: { top: 0.1, bottom: 0.15 },
+          quality: 'auto'
+        }
       }
     });
   };
@@ -151,7 +182,7 @@ export const BackgroundControls: React.FC = () => {
       
       <div className="control-group">
         <label className="control-label">Background Type</label>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
           <button
             className={`control-button ${isGradient ? 'active' : ''}`}
             onClick={switchToGradient}
@@ -163,6 +194,12 @@ export const BackgroundControls: React.FC = () => {
             onClick={switchToSolid}
           >
             Solid
+          </button>
+          <button
+            className={`control-button ${isAnimated ? 'active' : ''}`}
+            onClick={switchToAnimated}
+          >
+            Animated
           </button>
           <button
             className={`control-button ${isImage ? 'active' : ''}`}
@@ -224,6 +261,169 @@ export const BackgroundControls: React.FC = () => {
                 onClick={() => updateSolidConfig({ color: '#ffffff' })}
               >
                 Pure White
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isAnimated && animatedConfig?.variant === 'waves' && (
+        <>
+          <div className="control-group">
+            <label className="control-label">Wave Count: {animatedConfig.waves?.count || 4}</label>
+            <input
+              type="range"
+              className="control-input"
+              min="2"
+              max="8"
+              value={animatedConfig.waves?.count || 4}
+              onChange={(e) => updateAnimatedConfig({
+                waves: { 
+                  ...animatedConfig.waves!, 
+                  count: Number(e.target.value) 
+                }
+              })}
+            />
+          </div>
+
+          <div className="control-group">
+            <label className="control-label">Animation Speed: {animatedConfig.waves?.speed || 1.0}x</label>
+            <input
+              type="range"
+              className="control-input"
+              min="0.1"
+              max="3.0"
+              step="0.1"
+              value={animatedConfig.waves?.speed || 1.0}
+              onChange={(e) => updateAnimatedConfig({
+                waves: { 
+                  ...animatedConfig.waves!, 
+                  speed: Number(e.target.value) 
+                }
+              })}
+            />
+          </div>
+
+          <div className="control-group">
+            <label className="control-label">Wave Colors</label>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '12px', color: '#aaa', minWidth: '60px' }}>Primary:</label>
+              <input
+                type="color"
+                value={animatedConfig.waves?.colors.primary || '#646cff'}
+                onChange={(e) => updateAnimatedConfig({
+                  waves: { 
+                    ...animatedConfig.waves!, 
+                    colors: { 
+                      ...animatedConfig.waves!.colors, 
+                      primary: e.target.value 
+                    }
+                  }
+                })}
+              />
+            </div>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '12px', color: '#aaa', minWidth: '60px' }}>Secondary:</label>
+              <input
+                type="color"
+                value={animatedConfig.waves?.colors.secondary || '#8b5cf6'}
+                onChange={(e) => updateAnimatedConfig({
+                  waves: { 
+                    ...animatedConfig.waves!, 
+                    colors: { 
+                      ...animatedConfig.waves!.colors, 
+                      secondary: e.target.value 
+                    }
+                  }
+                })}
+              />
+            </div>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '12px', color: '#aaa', minWidth: '60px' }}>Highlight:</label>
+              <input
+                type="color"
+                value={animatedConfig.waves?.colors.highlight || '#00f5ff'}
+                onChange={(e) => updateAnimatedConfig({
+                  waves: { 
+                    ...animatedConfig.waves!, 
+                    colors: { 
+                      ...animatedConfig.waves!.colors, 
+                      highlight: e.target.value 
+                    }
+                  }
+                })}
+              />
+            </div>
+          </div>
+
+          <div className="control-group">
+            <h4 style={{ margin: '16px 0 8px 0', color: '#ccc', fontSize: '12px' }}>
+              Wave Presets
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  waves: {
+                    ...animatedConfig.waves!,
+                    colors: {
+                      primary: '#646cff',
+                      secondary: '#8b5cf6',
+                      highlight: '#00f5ff'
+                    },
+                    speed: 1.0
+                  }
+                })}
+              >
+                Tech Blue
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  waves: {
+                    ...animatedConfig.waves!,
+                    colors: {
+                      primary: '#ff6b6b',
+                      secondary: '#feca57',
+                      highlight: '#ff9ff3'
+                    },
+                    speed: 0.8
+                  }
+                })}
+              >
+                Warm Sunset
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  waves: {
+                    ...animatedConfig.waves!,
+                    colors: {
+                      primary: '#00d2d3',
+                      secondary: '#54a0ff',
+                      highlight: '#5f27cd'
+                    },
+                    speed: 1.5
+                  }
+                })}
+              >
+                Ocean Flow
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateAnimatedConfig({
+                  waves: {
+                    ...animatedConfig.waves!,
+                    colors: {
+                      primary: '#10ac84',
+                      secondary: '#1dd1a1',
+                      highlight: '#55efc4'
+                    },
+                    speed: 0.6
+                  }
+                })}
+              >
+                Matrix Green
               </button>
             </div>
           </div>

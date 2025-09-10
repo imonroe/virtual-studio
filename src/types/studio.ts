@@ -24,9 +24,25 @@ export interface ImageConfig {
 }
 
 export interface AnimatedConfig {
-  particleCount: number;
-  particleColor: string;
-  particleSpeed: number;
+  variant: 'particles' | 'waves';
+  particles?: {
+    count: number;
+    color: string;
+    speed: number;
+  };
+  waves?: {
+    count: number; // 2-8 waves
+    frequencies: number[];
+    amplitudes: number[];
+    speed: number;
+    colors: {
+      primary: string; // #646cff
+      secondary: string; // #8b5cf6  
+      highlight: string; // #00f5ff
+    };
+    edgeCoverage: { top: number; bottom: number };
+    quality: 'auto' | 'low' | 'medium' | 'high';
+  };
   backgroundGradient?: GradientConfig;
 }
 
