@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig, ImageConfig } from '@/types/studio';
+import type { GradientConfig, ImageConfig, SolidConfig } from '@/types/studio';
 
 export const BackgroundControls: React.FC = () => {
   const background = useStudioStore((state) => state.background);
@@ -10,15 +10,24 @@ export const BackgroundControls: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isGradient = background.type === 'gradient';
+  const isSolid = background.type === 'solid';
   const isImage = background.type === 'image';
   
   const gradientConfig = isGradient ? background.config as GradientConfig : null;
+  const solidConfig = isSolid ? background.config as SolidConfig : null;
   const imageConfig = isImage ? background.config as ImageConfig : null;
 
   const updateGradientConfig = (updates: Partial<GradientConfig>) => {
     if (!gradientConfig) return;
     setBackground({
       config: { ...gradientConfig, ...updates }
+    });
+  };
+
+  const updateSolidConfig = (updates: Partial<SolidConfig>) => {
+    if (!solidConfig) return;
+    setBackground({
+      config: { ...solidConfig, ...updates }
     });
   };
 
@@ -38,6 +47,15 @@ export const BackgroundControls: React.FC = () => {
         type: 'linear',
         animated: true,
         animationSpeed: 0.5
+      }
+    });
+  };
+
+  const switchToSolid = () => {
+    setBackground({
+      type: 'solid',
+      config: {
+        color: '#00ff00' // Default to chroma key green
       }
     });
   };
@@ -141,6 +159,12 @@ export const BackgroundControls: React.FC = () => {
             Gradient
           </button>
           <button
+            className={`control-button ${isSolid ? 'active' : ''}`}
+            onClick={switchToSolid}
+          >
+            Solid
+          </button>
+          <button
             className={`control-button ${isImage ? 'active' : ''}`}
             onClick={switchToImage}
           >
@@ -148,6 +172,63 @@ export const BackgroundControls: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {isSolid && (
+        <>
+          <div className="control-group">
+            <label className="control-label">Background Color</label>
+            <div className="color-picker" style={{ marginBottom: '8px' }}>
+              <input
+                type="color"
+                value={solidConfig?.color || '#00ff00'}
+                onChange={(e) => updateSolidConfig({ color: e.target.value })}
+                aria-label="Color picker"
+              />
+              <input
+                type="text"
+                className="control-input"
+                style={{ flex: 1 }}
+                value={solidConfig?.color || '#00ff00'}
+                onChange={(e) => updateSolidConfig({ color: e.target.value })}
+                placeholder="#000000"
+                aria-label="Hex color value"
+              />
+            </div>
+          </div>
+
+          <div className="control-group">
+            <h4 style={{ margin: '16px 0 8px 0', color: '#ccc', fontSize: '12px' }}>
+              Chroma Key Presets
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button
+                className="control-button"
+                onClick={() => updateSolidConfig({ color: '#00ff00' })}
+              >
+                Green Screen
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateSolidConfig({ color: '#0000ff' })}
+              >
+                Blue Screen
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateSolidConfig({ color: '#000000' })}
+              >
+                Pure Black
+              </button>
+              <button
+                className="control-button"
+                onClick={() => updateSolidConfig({ color: '#ffffff' })}
+              >
+                Pure White
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {isImage && (
         <>

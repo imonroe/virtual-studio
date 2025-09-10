@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { RenderingEngine } from '@engine/RenderingEngine';
 import { GradientBackground } from '@studio/backgrounds/GradientBackground';
+import { SolidBackground } from '@studio/backgrounds/SolidBackground';
 import { ImageBackground } from '@studio/backgrounds/ImageBackground';
 import { CSSGradientBackground } from '@studio/backgrounds/CSSGradientBackground';
+import { CSSSolidBackground } from '@studio/backgrounds/CSSSolidBackground';
 import { CSSImageBackground } from '@studio/backgrounds/CSSImageBackground';
 import { LowerThird } from '@studio/graphics/LowerThird';
 import { Ticker } from '@studio/graphics/Ticker';
@@ -10,13 +12,14 @@ import { Logo } from '@studio/graphics/Logo';
 import { ControlPanel } from '@controls/ControlPanel';
 import { useKeyboardShortcuts } from '@services/shortcuts/KeyboardShortcuts';
 import { useStudioStore } from '@services/state/studioStore';
-import type { GradientConfig, ImageConfig } from '@/types/studio';
+import type { GradientConfig, SolidConfig, ImageConfig } from '@/types/studio';
 import './Studio.css';
 
 export function Studio() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<RenderingEngine | null>(null);
   const gradientBackgroundRef = useRef<GradientBackground | null>(null);
+  const solidBackgroundRef = useRef<SolidBackground | null>(null);
   const imageBackgroundRef = useRef<ImageBackground | null>(null);
   const [renderMode, setRenderMode] = useState<'webgl' | 'css' | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -61,6 +64,12 @@ export function Studio() {
                 const mesh = gradientBackgroundRef.current.create();
                 scene.add(mesh);
                 console.log('WebGL gradient background added to scene', mesh);
+              } else if (background.type === 'solid') {
+                // Create solid background
+                solidBackgroundRef.current = new SolidBackground(background.config as SolidConfig);
+                const mesh = solidBackgroundRef.current.create();
+                scene.add(mesh);
+                console.log('WebGL solid background added to scene', mesh);
               } else if (background.type === 'image') {
                 // Create image background
                 imageBackgroundRef.current = new ImageBackground(background.config as ImageConfig);
@@ -84,6 +93,9 @@ export function Studio() {
         engine.onRender((deltaTime) => {
           if (gradientBackgroundRef.current) {
             gradientBackgroundRef.current.update(deltaTime);
+          }
+          if (solidBackgroundRef.current) {
+            solidBackgroundRef.current.update(deltaTime);
           }
           if (imageBackgroundRef.current) {
             imageBackgroundRef.current.update(deltaTime);
@@ -109,6 +121,10 @@ export function Studio() {
         gradientBackgroundRef.current.dispose();
         gradientBackgroundRef.current = null;
       }
+      if (solidBackgroundRef.current) {
+        solidBackgroundRef.current.dispose();
+        solidBackgroundRef.current = null;
+      }
       if (imageBackgroundRef.current) {
         imageBackgroundRef.current.dispose();
         imageBackgroundRef.current = null;
@@ -120,6 +136,8 @@ export function Studio() {
   useEffect(() => {
     if (gradientBackgroundRef.current && background.type === 'gradient') {
       gradientBackgroundRef.current.updateConfig(background.config as GradientConfig);
+    } else if (solidBackgroundRef.current && background.type === 'solid') {
+      solidBackgroundRef.current.updateConfig(background.config as SolidConfig);
     } else if (imageBackgroundRef.current && background.type === 'image') {
       imageBackgroundRef.current.updateConfig(background.config as ImageConfig);
     }
@@ -144,6 +162,13 @@ export function Studio() {
         gradientBackgroundRef.current = null;
       }
       
+      if (solidBackgroundRef.current) {
+        const mesh = solidBackgroundRef.current.getMesh();
+        if (mesh) scene.remove(mesh);
+        solidBackgroundRef.current.dispose();
+        solidBackgroundRef.current = null;
+      }
+      
       if (imageBackgroundRef.current) {
         const mesh = imageBackgroundRef.current.getMesh();
         if (mesh) scene.remove(mesh);
@@ -163,6 +188,11 @@ export function Studio() {
         const mesh = gradientBackgroundRef.current.create();
         scene.add(mesh);
         console.log('Switched to gradient background');
+      } else if (background.type === 'solid') {
+        solidBackgroundRef.current = new SolidBackground(background.config as SolidConfig);
+        const mesh = solidBackgroundRef.current.create();
+        scene.add(mesh);
+        console.log('Switched to solid background');
       } else if (background.type === 'image') {
         console.log('Using CSS image background instead of WebGL to avoid conflicts');
         // Skip WebGL image background creation - use CSS instead
@@ -176,6 +206,9 @@ export function Studio() {
   useEffect(() => {
     if (gradientBackgroundRef.current) {
       gradientBackgroundRef.current.setVisible(background.visible);
+    }
+    if (solidBackgroundRef.current) {
+      solidBackgroundRef.current.setVisible(background.visible);
     }
     if (imageBackgroundRef.current) {
       imageBackgroundRef.current.setVisible(background.visible);
@@ -210,6 +243,11 @@ export function Studio() {
             <CSSGradientBackground config={background.config as GradientConfig} />
           )}
           
+          {/* CSS Solid Background - use CSS for solid colors to avoid WebGL complexity */}
+          {background.visible && background.type === 'solid' && (
+            <CSSSolidBackground config={background.config as SolidConfig} />
+          )}
+          
           {/* CSS Image Background - always use CSS for images to avoid WebGL conflicts */}
           {background.visible && background.type === 'image' && (
             <CSSImageBackground config={background.config as ImageConfig} visible={background.visible} />
@@ -222,7 +260,7 @@ export function Studio() {
             width="1920"
             height="1080"
             style={{ 
-              display: renderMode === 'webgl' && background.type !== 'image' ? 'block' : 'none',
+              display: renderMode === 'webgl' && background.type !== 'image' && background.type !== 'solid' ? 'block' : 'none',
               opacity: background.visible ? 1 : 0
             }}
           />
