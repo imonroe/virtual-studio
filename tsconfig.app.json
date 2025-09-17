@@ -36,5 +36,6 @@
       "@types/*": ["./src/types/*"]
     }
   },
-  "include": ["src", "src/**/*.glsl", "src/**/*.vert", "src/**/*.frag"]
+  "include": ["src", "src/**/*.glsl", "src/**/*.vert", "src/**/*.frag"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/__tests__/**/*", "src/test-setup.ts"]
 }
