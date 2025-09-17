@@ -99,7 +99,8 @@ export class GradientBackground {
   }
 
   updateConfig(config: Partial<GradientConfig>): void {
-    Object.assign(this.config, config);
+    // Create a new config object to avoid modifying readonly properties
+    this.config = { ...this.config, ...config };
 
     if (this.material instanceof THREE.ShaderMaterial && this.material.uniforms) {
       if (config.colors) {

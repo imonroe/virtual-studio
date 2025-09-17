@@ -87,7 +87,8 @@ export class ParticleSystem {
   }
 
   updateConfig(config: Partial<ParticleConfig>): void {
-    Object.assign(this.config, config);
+    // Create a new config object to avoid modifying readonly properties
+    this.config = { ...this.config, ...config };
 
     if (this.material) {
       if (config.color) {

@@ -145,7 +145,8 @@ export class WavesBackground {
   }
 
   updateConfig(config: Partial<AnimatedConfig>): void {
-    Object.assign(this.config, config);
+    // Create a new config object to avoid modifying readonly properties
+    this.config = { ...this.config, ...config };
 
     if (!this.material || !this.material.uniforms || !config.waves) return;
 
