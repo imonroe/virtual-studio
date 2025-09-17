@@ -491,7 +491,8 @@ export class NeuralNetworkBackground {
   }
 
   updateConfig(config: Partial<AnimatedConfig>): void {
-    Object.assign(this.config, config);
+    // Create a new config object to avoid modifying readonly properties
+    this.config = { ...this.config, ...config };
 
     if (!config.neural) return;
 

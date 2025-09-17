@@ -36,7 +36,8 @@ export class SolidBackground {
   }
 
   updateConfig(config: Partial<SolidConfig>): void {
-    Object.assign(this.config, config);
+    // Create a new config object to avoid modifying readonly properties
+    this.config = { ...this.config, ...config };
 
     // Update material color if it changed
     if (config.color && this.material) {
