@@ -89,6 +89,7 @@ export interface Ticker {
   backgroundColor: string;
   textColor: string;
   fontSize: number;
+  animated: boolean;
 }
 
 export interface Clock {

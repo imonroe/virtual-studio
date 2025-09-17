@@ -220,6 +220,7 @@ export const useStudioStore = create<StudioState>()(
               backgroundColor: 'rgba(0, 0, 0, 0.9)',
               textColor: '#ffffff',
               fontSize: 14,
+              animated: true,
               ...ticker
             };
           }
