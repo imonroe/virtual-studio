@@ -8,6 +8,33 @@
     <meta name="keywords" content="virtual studio, broadcast graphics, streaming, OBS, lower thirds, overlays, content creation" />
     <meta name="author" content="Virtual Studio" />
     <title>Virtual Video Studio</title>
+    
+    <!-- Google Analytics (gtag.js) - Only load if measurement ID is configured -->
+    <script>
+      // Check if GA measurement ID is configured
+      if (import.meta.env.VITE_GA_MEASUREMENT_ID) {
+        // Create gtag script tag
+        const gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_MEASUREMENT_ID}`;
+        document.head.appendChild(gtagScript);
+        
+        // Initialize dataLayer and gtag function
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        
+        // Configure gtag with measurement ID
+        gtag('js', new Date());
+        gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID, {
+          // Disable automatic page view tracking (we'll handle manually in React)
+          send_page_view: false,
+          // Enable Google Consent Mode v2 for GDPR compliance
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
