@@ -55,7 +55,8 @@ export const TickerControls: React.FC = () => {
                 setTicker({
                   visible: e.target.checked,
                   content: ['Breaking News: Sample ticker content'],
-                  speed: 50
+                  speed: 50,
+                  animated: true
                 });
               } else {
                 toggleTicker();
@@ -121,12 +122,24 @@ export const TickerControls: React.FC = () => {
           </div>
 
           <div className="control-group">
+            <div className="control-checkbox">
+              <input
+                type="checkbox"
+                id="tickerAnimated"
+                checked={ticker.animated ?? true}
+                onChange={(e) => updateTicker({ animated: e.target.checked })}
+              />
+              <label htmlFor="tickerAnimated">Enable Animation</label>
+            </div>
+          </div>
+
+          <div className="control-group">
             <label className="control-label">Scroll Speed: {ticker.speed}px/s</label>
             <input
               type="range"
               className="control-input"
               min="20"
-              max="100"
+              max="60"
               value={ticker.speed}
               onChange={(e) => updateTicker({ speed: Number(e.target.value) })}
             />
@@ -198,7 +211,8 @@ export const TickerControls: React.FC = () => {
                   ],
                   backgroundColor: 'rgba(220, 38, 38, 0.9)',
                   textColor: '#ffffff',
-                  speed: 50
+                  speed: 45,
+                  animated: true
                 })}
               >
                 Breaking News
@@ -214,7 +228,8 @@ export const TickerControls: React.FC = () => {
                   ],
                   backgroundColor: 'rgba(34, 197, 94, 0.9)',
                   textColor: '#ffffff',
-                  speed: 60
+                  speed: 55,
+                  animated: true
                 })}
               >
                 Financial
@@ -229,7 +244,8 @@ export const TickerControls: React.FC = () => {
                   ],
                   backgroundColor: 'rgba(249, 115, 22, 0.9)',
                   textColor: '#ffffff',
-                  speed: 45
+                  speed: 35,
+                  animated: true
                 })}
               >
                 Sports

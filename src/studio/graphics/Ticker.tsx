@@ -29,13 +29,14 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
       element.style.setProperty('--bg-color', config.backgroundColor);
       element.style.setProperty('--text-color', config.textColor);
       element.style.setProperty('--font-size', `${config.fontSize}px`);
-      element.style.setProperty('--scroll-speed', `${config.speed}s`);
       
-      // Calculate animation duration based on content length and speed
-      const duration = Math.max(scrollWidth / config.speed, 10);
-      element.style.setProperty('--animation-duration', `${duration}s`);
+      // Calculate animation duration based on content length and speed (px per second)
+      // Use total content width + container width for smooth looping
+      const totalDistance = scrollWidth + containerWidth;
+      const duration = totalDistance / config.speed;
+      element.style.setProperty('--animation-duration', `${Math.max(duration, 5)}s`);
     }
-  }, [config, scrollWidth]);
+  }, [config, scrollWidth, containerWidth]);
 
   // Handle resize
   useEffect(() => {
@@ -66,15 +67,15 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
           ref={textRef}
           className="ticker-text"
           style={{
-            animation: scrollWidth > containerWidth 
+            animation: config.animated && config.content.length > 0
               ? `tickerScroll var(--animation-duration, 30s) linear infinite`
               : 'none'
           }}
         >
-          {/* Duplicate content for seamless loop */}
+          {/* Always duplicate content for seamless loop when animated */}
           <span>{tickerContent}</span>
-          {scrollWidth > containerWidth && (
-            <span style={{ marginLeft: '100px' }}>{tickerContent}</span>
+          {config.animated && config.content.length > 0 && (
+            <span style={{ marginLeft: '40px' }}>{tickerContent}</span>
           )}
         </div>
       </div>
