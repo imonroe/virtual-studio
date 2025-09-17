@@ -1,0 +1,172 @@
+/**
+ * ConsentBanner Styles
+ * 
+ * GDPR-compliant consent banner styling for Virtual Studio.
+ * Follows existing design system patterns.
+ */
+
+.banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #2a2a2a;
+  border-top: 1px solid #444;
+  padding: 16px;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
+
+.message {
+  flex: 1;
+  color: #fff;
+}
+
+.message p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.message p:last-child {
+  margin-bottom: 0;
+}
+
+.privacy {
+  color: #ccc !important;
+  font-size: 12px !important;
+  opacity: 0.8;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .actions {
+    justify-content: center;
+  }
+}
+
+.button {
+  padding: 8px 16px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: transparent;
+  min-width: 80px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.button:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.decline {
+  color: #ccc;
+  border-color: #555;
+}
+
+.decline:hover {
+  color: #fff;
+  border-color: #666;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.accept {
+  color: #fff;
+  background-color: #646cff;
+  border-color: #646cff;
+}
+
+.accept:hover {
+  background-color: #5a5fcf;
+  border-color: #5a5fcf;
+}
+
+.accept:active {
+  background-color: #4f54b8;
+  border-color: #4f54b8;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .banner {
+    border-top: 2px solid #fff;
+  }
+  
+  .button {
+    border-width: 2px;
+  }
+  
+  .decline {
+    color: #fff;
+    border-color: #fff;
+  }
+  
+  .accept {
+    background-color: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+}
+
+/* Print styles */
+@media print {
+  .banner {
+    display: none;
+  }
+}

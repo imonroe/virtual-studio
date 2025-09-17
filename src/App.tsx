@@ -1,12 +1,69 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Studio } from './pages/Studio';
 import { FeedbackPage } from './pages/FeedbackPage';
+import { AnalyticsProvider } from '@/providers/AnalyticsProvider';
+import { ConsentBanner } from '@/components/ConsentBanner';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { getEnvironmentConfig } from '@/services/analytics';
 import './App.css';
 
-function App() {
+// Analytics tracking component for route changes
+function AnalyticsTracker() {
+  const location = useLocation();
+  const analytics = useAnalytics();
+
+  useEffect(() => {
+    // Track page view on route change
+    if (analytics.isReady && analytics.hasConsent) {
+      const pageTitle = getPageTitle(location.pathname);
+      analytics.trackPageView(pageTitle, window.location.href);
+    }
+  }, [location.pathname, analytics]);
+
+  return null;
+}
+
+// Get page title based on route
+function getPageTitle(pathname: string): string {
+  switch (pathname) {
+    case '/':
+      return 'Virtual Studio - Home';
+    case '/app':
+      return 'Virtual Studio - Application';
+    case '/feedback':
+      return 'Virtual Studio - Feedback';
+    default:
+      return 'Virtual Studio';
+  }
+}
+
+// Main app content with analytics
+function AppContent() {
+  const [showConsentBanner, setShowConsentBanner] = useState(false);
+  const analytics = useAnalytics();
+  const { measurementId } = getEnvironmentConfig();
+
+  useEffect(() => {
+    // Show consent banner if we have a measurement ID but no consent
+    if (measurementId && !analytics.hasConsent) {
+      setShowConsentBanner(true);
+    }
+  }, [measurementId, analytics.hasConsent]);
+
+  const handleConsentAccept = () => {
+    analytics.requestConsent();
+    setShowConsentBanner(false);
+  };
+
+  const handleConsentDecline = () => {
+    setShowConsentBanner(false);
+  };
+
   return (
-    <Router>
+    <>
+      <AnalyticsTracker />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/app" element={<Studio />} />
@@ -14,7 +71,43 @@ function App() {
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+      
+      <ConsentBanner
+        isVisible={showConsentBanner}
+        onAccept={handleConsentAccept}
+        onDecline={handleConsentDecline}
+        message="We use analytics to improve Virtual Studio. This helps us understand how you use the application and make it better."
+        acceptText="Accept Analytics"
+        declineText="No Thanks"
+      />
+    </>
+  );
+}
+
+function App() {
+  const { measurementId, debug } = getEnvironmentConfig();
+
+  const handleConsentRequired = () => {
+    if (debug) {
+      console.log('[App] Consent required for analytics');
+    }
+  };
+
+  const handleAnalyticsError = (error: Error) => {
+    console.warn('[App] Analytics error:', error);
+  };
+
+  return (
+    <AnalyticsProvider
+      measurementId={measurementId}
+      debug={debug}
+      onConsentRequired={handleConsentRequired}
+      onError={handleAnalyticsError}
+    >
+      <Router>
+        <AppContent />
+      </Router>
+    </AnalyticsProvider>
   );
 }
 
