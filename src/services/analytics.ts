@@ -37,7 +37,7 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       }
       
       // Configure gtag with consent mode
-      if (config.consentGiven) {
+      if (config.consentGiven && window.gtag) {
         window.gtag('consent', 'update', {
           analytics_storage: 'granted',
           ad_storage: 'denied' // We only use analytics, not ads
@@ -69,12 +69,14 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
       script.onload = () => {
         // Initialize gtag
-        window.gtag('js', new Date());
-        window.gtag('config', measurementId, {
-          send_page_view: false, // We'll handle page views manually
-          allow_google_signals: false,
-          allow_ad_personalization_signals: false
-        });
+        if (window.gtag) {
+          window.gtag('js', new Date());
+          window.gtag('config', measurementId, {
+            send_page_view: false, // We'll handle page views manually
+            allow_google_signals: false,
+            allow_ad_personalization_signals: false
+          });
+        }
         resolve();
       };
       script.onerror = () => {
