@@ -23,6 +23,9 @@ export const LandingPage: React.FC = () => {
               <Link to="/app" className="cta-button primary">
                 Launch Studio
               </Link>
+              <Link to="/docs" className="cta-button secondary">
+                Documentation
+              </Link>
               <a href="#features" className="cta-button secondary">
                 Learn More
               </a>

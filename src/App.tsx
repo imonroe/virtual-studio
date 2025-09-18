@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Studio } from './pages/Studio';
 import { FeedbackPage } from './pages/FeedbackPage';
+import { DocumentationPage } from './pages/DocumentationPage';
 import { AnalyticsProvider } from '@/providers/AnalyticsProvider';
 import { ConsentBanner } from '@/components/ConsentBanner';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -34,6 +35,8 @@ function getPageTitle(pathname: string): string {
       return 'Virtual Studio - Application';
     case '/feedback':
       return 'Virtual Studio - Feedback';
+    case '/docs':
+      return 'Virtual Studio - Documentation';
     default:
       return 'Virtual Studio';
   }
@@ -68,6 +71,7 @@ function AppContent() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/app" element={<Studio />} />
         <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/docs" element={<DocumentationPage />} />
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
