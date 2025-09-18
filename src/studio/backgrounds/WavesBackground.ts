@@ -107,39 +107,58 @@ export class WavesBackground {
     // Get waves config with defaults
     const wavesConfig = this.config.waves || this.getDefaultWavesConfig();
 
-    // Create shader material
-    this.material = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: {
-        time: { value: 0.0 },
-        waveCount: { value: Math.min(wavesConfig.count, 8) },
-        frequencies: { value: this.padArray(wavesConfig.frequencies, 8, 1.0) },
-        amplitudes: { value: this.padArray(wavesConfig.amplitudes, 8, 0.5) },
-        speed: { value: wavesConfig.speed },
-        colorPrimary: { value: this.hexToVec3(wavesConfig.colors.primary) },
-        colorSecondary: { value: this.hexToVec3(wavesConfig.colors.secondary) },
-        colorHighlight: { value: this.hexToVec3(wavesConfig.colors.highlight) },
-        edgeCoverage: { value: new THREE.Vector2(wavesConfig.edgeCoverage.top, wavesConfig.edgeCoverage.bottom) },
-        resolution: { value: new THREE.Vector2(1920, 1080) }
-      },
-      side: THREE.DoubleSide,
-      transparent: true,
-      blending: THREE.NormalBlending
-    });
+    // Temporarily disable shader material to debug WebGL errors
+    // TODO: Re-enable after fixing uniform/matrix issues
+    const useShaders = false;
+    
+    if (useShaders) {
+      this.material = new THREE.ShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        uniforms: {
+          time: { value: 0.0 },
+          waveCount: { value: Math.min(wavesConfig.count, 8) },
+          frequencies: { value: this.padArray(wavesConfig.frequencies, 8, 1.0) },
+          amplitudes: { value: this.padArray(wavesConfig.amplitudes, 8, 0.5) },
+          speed: { value: wavesConfig.speed },
+          colorPrimary: { value: this.hexToVec3(wavesConfig.colors.primary) },
+          colorSecondary: { value: this.hexToVec3(wavesConfig.colors.secondary) },
+          colorHighlight: { value: this.hexToVec3(wavesConfig.colors.highlight) },
+          edgeCoverage: { value: new THREE.Vector2(wavesConfig.edgeCoverage.top, wavesConfig.edgeCoverage.bottom) },
+          resolution: { value: new THREE.Vector2(1920, 1080) }
+        },
+        side: THREE.DoubleSide,
+        transparent: true,
+        blending: THREE.NormalBlending
+      });
+    } else {
+      // Use basic material with wave-like color
+      this.material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(wavesConfig.colors.primary),
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.6
+      }) as any; // Type assertion to match expected ShaderMaterial type
+    }
 
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.mesh = new THREE.Mesh(this.geometry, this.material!);
     this.mesh.position.z = -1; // Place behind other elements
 
-    console.log('WavesBackground mesh created with config:', wavesConfig);
     return this.mesh;
   }
 
   update(_deltaTime: number): void {
-    if (!this.material || !this.material.uniforms) return;
+    if (!this.material || !this.mesh || !this.material.uniforms) return;
 
-    const currentTime = performance.now() / 1000;
-    this.material.uniforms.time.value = currentTime - this.startTime;
+    try {
+      if (this.material instanceof THREE.ShaderMaterial && 
+          this.material.uniforms.time) {
+        const currentTime = performance.now() / 1000;
+        this.material.uniforms.time.value = currentTime - this.startTime;
+      }
+    } catch (error) {
+      // Silently handle WebGL errors during disposal
+    }
     
     void _deltaTime; // Explicitly ignore parameter
   }
@@ -173,8 +192,6 @@ export class WavesBackground {
     if (wavesConfig.edgeCoverage) {
       this.material.uniforms.edgeCoverage.value.set(wavesConfig.edgeCoverage.top, wavesConfig.edgeCoverage.bottom);
     }
-
-    console.log('WavesBackground config updated:', wavesConfig);
   }
 
   setVisible(visible: boolean): void {

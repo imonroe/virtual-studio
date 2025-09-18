@@ -48,7 +48,6 @@ export const localStorageService = {
       };
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storageState));
-      console.log('💾 Studio state saved to localStorage');
     } catch (error) {
       console.error('Failed to save state to localStorage:', error);
     }
@@ -59,7 +58,6 @@ export const localStorageService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
-        console.log('📁 No saved state found in localStorage');
         return null;
       }
 
@@ -78,7 +76,6 @@ export const localStorageService = {
         return null;
       }
 
-      console.log('📂 Studio state loaded from localStorage');
       return storageState.state;
     } catch (error) {
       console.error('Failed to load state from localStorage:', error);
@@ -90,7 +87,6 @@ export const localStorageService = {
   clearState: (): void => {
     try {
       localStorage.removeItem(STORAGE_KEY);
-      console.log('🗑️ Studio state cleared from localStorage');
     } catch (error) {
       console.error('Failed to clear state from localStorage:', error);
     }

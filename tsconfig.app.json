@@ -30,9 +30,7 @@
       "@engine/*": ["./src/engine/*"],
       "@studio/*": ["./src/studio/*"],
       "@controls/*": ["./src/controls/*"],
-      "@animations/*": ["./src/animations/*"],
       "@services/*": ["./src/services/*"],
-      "@utils/*": ["./src/utils/*"],
       "@types/*": ["./src/types/*"]
     }
   },

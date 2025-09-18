@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import vertexShader from '@engine/webgl/shaders/particles.vert';
-import fragmentShader from '@engine/webgl/shaders/particles.frag';
+// Temporarily disabled shader imports to debug WebGL errors
+// import vertexShader from '@engine/webgl/shaders/particles.vert';
+// import fragmentShader from '@engine/webgl/shaders/particles.frag';
 
 export interface ParticleConfig {
   count: number;
@@ -56,31 +57,47 @@ export class ParticleSystem {
     this.geometry.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
     this.geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
 
-    // Create shader material
-    this.material = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: {
-        time: { value: 0 },
-        speed: { value: this.config.speed },
-        color: { value: new THREE.Color(this.config.color) },
-        resolution: { value: new THREE.Vector2(1920, 1080) }
-      },
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-      vertexColors: false,
-      depthWrite: false,
-      depthTest: true
-    });
+    // Temporarily disable shader material to debug WebGL errors
+    // TODO: Re-enable after fixing uniform/matrix issues
+    const useShaders = false;
+    
+    if (useShaders) {
+      // Shader material code temporarily disabled
+      // this.material = new THREE.ShaderMaterial({
+      //   vertexShader,
+      //   fragmentShader,
+      //   uniforms: {
+      //     time: { value: 0 },
+      //     speed: { value: this.config.speed },
+      //     color: { value: new THREE.Color(this.config.color) },
+      //     resolution: { value: new THREE.Vector2(1920, 1080) }
+      //   },
+      //   blending: THREE.AdditiveBlending,
+      //   transparent: true,
+      //   vertexColors: false,
+      //   depthWrite: false,
+      //   depthTest: true
+      // });
+    } else {
+      // Use basic point material
+      this.material = new THREE.PointsMaterial({
+        color: new THREE.Color(this.config.color),
+        transparent: true,
+        opacity: 0.7,
+        size: 3.0,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending
+      }) as any; // Type assertion to match expected ShaderMaterial type
+    }
 
-    this.mesh = new THREE.Points(this.geometry, this.material);
+    this.mesh = new THREE.Points(this.geometry, this.material!);
     this.mesh.frustumCulled = false; // Always render particles
 
     return this.mesh;
   }
 
   update(_deltaTime: number): void {
-    if (!this.material) return;
+    if (!this.material || !this.material.uniforms) return;
 
     const currentTime = performance.now() / 1000;
     this.material.uniforms.time.value = currentTime - this.startTime;
@@ -90,7 +107,7 @@ export class ParticleSystem {
     // Create a new config object to avoid modifying readonly properties
     this.config = { ...this.config, ...config };
 
-    if (this.material) {
+    if (this.material && this.material.uniforms) {
       if (config.color) {
         this.material.uniforms.color.value = new THREE.Color(config.color);
       }
@@ -116,7 +133,7 @@ export class ParticleSystem {
   }
 
   setResolution(width: number, height: number): void {
-    if (this.material) {
+    if (this.material && this.material.uniforms) {
       this.material.uniforms.resolution.value.set(width, height);
     }
   }

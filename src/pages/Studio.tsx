@@ -27,8 +27,6 @@ export function Studio() {
   const wavesBackgroundRef = useRef<WavesBackground | null>(null);
   const neuralBackgroundRef = useRef<NeuralNetworkBackground | null>(null);
   const imageBackgroundRef = useRef<ImageBackground | null>(null);
-  const [renderMode, setRenderMode] = useState<'webgl' | 'css' | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   const background = useStudioStore((state) => state.background);
   const clock = useStudioStore((state) => state.clock);
@@ -38,8 +36,7 @@ export function Studio() {
   const logos = useStudioStore((state) => state.logos);
 
   // Initialize keyboard shortcuts
-  const { shortcuts } = useKeyboardShortcuts();
-  console.log('🎹 App: Keyboard shortcuts loaded:', shortcuts.length);
+  useKeyboardShortcuts();
 
   useEffect(() => {
     const initEngine = async () => {
@@ -57,25 +54,26 @@ export function Studio() {
         engineRef.current = engine;
 
         const mode = engine.getMode();
-        console.log('Engine initialized with mode:', mode);
         
         if (mode === 'webgl') {
           const webglContext = engine.getWebGLContext();
           if (webglContext) {
             const scene = webglContext.getScene();
             if (scene) {
+              // Skip WebGL background creation - use CSS backgrounds to avoid Mesh-related matrix errors
+              /*
               if (background.type === 'gradient') {
-                // Create gradient background
+                // Create gradient background (now using simple color material)
+                console.log('🔍 DEBUG: Creating gradient background with simple material...');
                 gradientBackgroundRef.current = new GradientBackground(background.config as GradientConfig);
                 const mesh = gradientBackgroundRef.current.create();
                 scene.add(mesh);
-                console.log('WebGL gradient background added to scene', mesh);
+                console.log('🔍 DEBUG: Gradient background created and added to scene');
               } else if (background.type === 'solid') {
                 // Create solid background
                 solidBackgroundRef.current = new SolidBackground(background.config as SolidConfig);
                 const mesh = solidBackgroundRef.current.create();
                 scene.add(mesh);
-                console.log('WebGL solid background added to scene', mesh);
               } else if (background.type === 'animated') {
                 const animatedConfig = background.config as AnimatedConfig;
                 if (animatedConfig.variant === 'neural') {
@@ -83,13 +81,11 @@ export function Studio() {
                   neuralBackgroundRef.current = new NeuralNetworkBackground(animatedConfig);
                   const group = neuralBackgroundRef.current.create();
                   scene.add(group);
-                  console.log('WebGL neural network background added to scene', group);
                 } else {
                   // Create waves background
                   wavesBackgroundRef.current = new WavesBackground(animatedConfig);
                   const mesh = wavesBackgroundRef.current.create();
                   scene.add(mesh);
-                  console.log('WebGL waves background added to scene', mesh);
                 }
               } else if (background.type === 'image') {
                 // Create image background
@@ -97,43 +93,45 @@ export function Studio() {
                 try {
                   const mesh = await imageBackgroundRef.current.create();
                   scene.add(mesh);
-                  console.log('WebGL image background added to scene', mesh);
                 } catch (error) {
                   console.error('Failed to create image background:', error);
                 }
               }
+              */
             }
           }
-          setRenderMode('webgl');
+          // WebGL available but using CSS backgrounds
         } else {
-          setRenderMode('css');
-          console.log('Using CSS fallback mode');
+          // Fallback to CSS backgrounds
         }
 
         // Set up render callback
         engine.onRender((deltaTime) => {
-          if (gradientBackgroundRef.current) {
-            gradientBackgroundRef.current.update(deltaTime);
-          }
-          if (solidBackgroundRef.current) {
-            solidBackgroundRef.current.update(deltaTime);
-          }
-          if (wavesBackgroundRef.current) {
-            wavesBackgroundRef.current.update(deltaTime);
-          }
-          if (neuralBackgroundRef.current) {
-            neuralBackgroundRef.current.update(deltaTime);
-          }
-          if (imageBackgroundRef.current) {
-            imageBackgroundRef.current.update(deltaTime);
+          // Only update backgrounds if they exist and have valid meshes/materials
+          try {
+            if (gradientBackgroundRef.current && gradientBackgroundRef.current.getMesh()) {
+              gradientBackgroundRef.current.update(deltaTime);
+            }
+            if (solidBackgroundRef.current && solidBackgroundRef.current.getMesh()) {
+              solidBackgroundRef.current.update(deltaTime);
+            }
+            if (wavesBackgroundRef.current && wavesBackgroundRef.current.getMesh()) {
+              wavesBackgroundRef.current.update(deltaTime);
+            }
+            if (neuralBackgroundRef.current && neuralBackgroundRef.current.getGroup()) {
+              neuralBackgroundRef.current.update(deltaTime);
+            }
+            if (imageBackgroundRef.current && imageBackgroundRef.current.getMesh()) {
+              imageBackgroundRef.current.update(deltaTime);
+            }
+          } catch (error) {
+            // Silently handle render errors during background switching
           }
         });
 
-        setIsInitialized(true);
-        console.log('Rendering engine initialized successfully', { mode, isInitialized: true });
       } catch (error) {
         console.error('Failed to initialize rendering engine:', error);
-        setRenderMode('css');
+        // Using CSS backgrounds as fallback
       }
     };
 
@@ -196,74 +194,58 @@ export function Studio() {
       const scene = webglContext.getScene();
       if (!scene) return;
 
-      // Clean up existing backgrounds
-      if (gradientBackgroundRef.current) {
-        const mesh = gradientBackgroundRef.current.getMesh();
-        if (mesh) scene.remove(mesh);
-        gradientBackgroundRef.current.dispose();
-        gradientBackgroundRef.current = null;
-      }
-      
-      if (solidBackgroundRef.current) {
-        const mesh = solidBackgroundRef.current.getMesh();
-        if (mesh) scene.remove(mesh);
-        solidBackgroundRef.current.dispose();
-        solidBackgroundRef.current = null;
-      }
-      
-      if (wavesBackgroundRef.current) {
-        const mesh = wavesBackgroundRef.current.getMesh();
-        if (mesh) scene.remove(mesh);
-        wavesBackgroundRef.current.dispose();
-        wavesBackgroundRef.current = null;
-      }
-      
-      if (neuralBackgroundRef.current) {
-        const group = neuralBackgroundRef.current.getGroup();
-        if (group) scene.remove(group);
-        neuralBackgroundRef.current.dispose();
-        neuralBackgroundRef.current = null;
-      }
-      
-      if (imageBackgroundRef.current) {
-        const mesh = imageBackgroundRef.current.getMesh();
-        if (mesh) scene.remove(mesh);
-        imageBackgroundRef.current.dispose();
-        imageBackgroundRef.current = null;
-      }
+      // Clean up existing backgrounds more safely
+      const backgroundsToCleanup = [
+        { ref: gradientBackgroundRef, getMesh: (bg: any) => bg.getMesh() },
+        { ref: solidBackgroundRef, getMesh: (bg: any) => bg.getMesh() },
+        { ref: wavesBackgroundRef, getMesh: (bg: any) => bg.getMesh() },
+        { ref: neuralBackgroundRef, getMesh: (bg: any) => bg.getGroup() },
+        { ref: imageBackgroundRef, getMesh: (bg: any) => bg.getMesh() }
+      ];
 
-      // TEMP DEBUG: Force clear all children from scene to reset WebGL state
-      console.log('Scene children before clear:', scene.children.length);
-      const childrenToRemove = [...scene.children];
-      childrenToRemove.forEach(child => scene.remove(child));
-      console.log('Scene children after clear:', scene.children.length);
+      // Remove from scene first, then dispose
+      backgroundsToCleanup.forEach(({ ref, getMesh }) => {
+        if (ref.current) {
+          const object = getMesh(ref.current);
+          if (object && object.parent === scene) {
+            scene.remove(object);
+          }
+        }
+      });
+
+      // Dispose backgrounds after removal from scene
+      backgroundsToCleanup.forEach(({ ref }) => {
+        if (ref.current) {
+          ref.current.dispose();
+          ref.current = null;
+        }
+      });
+
+      // Final cleanup - remove any remaining children
+      const remainingChildren = [...scene.children];
+      remainingChildren.forEach(child => scene.remove(child));
 
       // Create new background based on type
       if (background.type === 'gradient') {
         gradientBackgroundRef.current = new GradientBackground(background.config as GradientConfig);
         const mesh = gradientBackgroundRef.current.create();
         scene.add(mesh);
-        console.log('Switched to gradient background');
       } else if (background.type === 'solid') {
         solidBackgroundRef.current = new SolidBackground(background.config as SolidConfig);
         const mesh = solidBackgroundRef.current.create();
         scene.add(mesh);
-        console.log('Switched to solid background');
       } else if (background.type === 'animated') {
         const animatedConfig = background.config as AnimatedConfig;
         if (animatedConfig.variant === 'neural') {
           neuralBackgroundRef.current = new NeuralNetworkBackground(animatedConfig);
           const group = neuralBackgroundRef.current.create();
           scene.add(group);
-          console.log('Switched to neural network background');
         } else {
           wavesBackgroundRef.current = new WavesBackground(animatedConfig);
           const mesh = wavesBackgroundRef.current.create();
           scene.add(mesh);
-          console.log('Switched to waves background');
         }
       } else if (background.type === 'image') {
-        console.log('Using CSS image background instead of WebGL to avoid conflicts');
         // Skip WebGL image background creation - use CSS instead
       }
     };
@@ -299,15 +281,6 @@ export function Studio() {
     return () => clearInterval(interval);
   }, []);
 
-  // Debug logging (reduced frequency)
-  if (Math.random() < 0.01) {
-    console.log('Render state:', { 
-      renderMode, 
-      backgroundVisible: background.visible, 
-      backgroundType: background.type,
-      isInitialized 
-    });
-  }
 
   return (
     <div className="app">
@@ -345,7 +318,7 @@ export function Studio() {
             width="1920"
             height="1080"
             style={{ 
-              display: renderMode === 'webgl' && background.type !== 'image' && background.type !== 'solid' ? 'block' : 'none',
+              display: 'none', // Keep WebGL disabled for backgrounds - use CSS instead
               opacity: background.visible ? 1 : 0
             }}
           />

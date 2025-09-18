@@ -427,8 +427,6 @@ if (localStorageService.isAvailable()) {
       localStorageService.saveState(state);
     }, 500); // Save 500ms after last change
   });
-  
-  console.log('💾 Auto-save enabled for Virtual Studio state');
 } else {
   console.warn('⚠️ localStorage not available, settings will not persist');
 }

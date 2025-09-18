@@ -51,7 +51,7 @@ export function DocumentationPage({ initialSection, initialSubsection }: Documen
       breadcrumbs,
       sidebarOpen: prev.sidebarOpen
     }));
-  }, [documentationStructure]);
+  }, []);
 
   // Update navigation state when URL params change
   useEffect(() => {

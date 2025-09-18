@@ -169,12 +169,6 @@ export class NeuralNetworkBackground {
 
     this.group.position.z = -1; // Place behind other elements
     
-    console.log('NeuralNetworkBackground created:', {
-      nodes: this.nodes.length,
-      connections: this.connections.length,
-      packets: this.packets.length
-    });
-    
     return this.group;
   }
 
@@ -310,18 +304,33 @@ export class NeuralNetworkBackground {
     this.nodesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     this.nodesGeometry.setAttribute('opacity', new THREE.BufferAttribute(opacities, 1));
 
-    this.nodesMaterial = new THREE.ShaderMaterial({
-      vertexShader: nodeVertexShader,
-      fragmentShader: nodeFragmentShader,
-      uniforms: {
-        nodeCore: { value: this.hexToVec3(config.colors.nodeCore) },
-        nodeGlow: { value: this.hexToVec3(config.colors.nodeGlow) }
-      },
-      transparent: true,
-      blending: THREE.AdditiveBlending
-    });
+    // Temporarily disable shader material to debug WebGL errors
+    // TODO: Re-enable after fixing uniform/matrix issues
+    const useShaders = false;
+    
+    if (useShaders) {
+      this.nodesMaterial = new THREE.ShaderMaterial({
+        vertexShader: nodeVertexShader,
+        fragmentShader: nodeFragmentShader,
+        uniforms: {
+          nodeCore: { value: this.hexToVec3(config.colors.nodeCore) },
+          nodeGlow: { value: this.hexToVec3(config.colors.nodeGlow) }
+        },
+        transparent: true,
+        blending: THREE.AdditiveBlending
+      });
+    } else {
+      // Use basic point material
+      this.nodesMaterial = new THREE.PointsMaterial({
+        color: new THREE.Color(config.colors.nodeCore),
+        transparent: true,
+        opacity: 0.8,
+        size: 2.0,
+        sizeAttenuation: true
+      }) as any; // Type assertion to match expected ShaderMaterial type
+    }
 
-    this.nodesMesh = new THREE.Points(this.nodesGeometry, this.nodesMaterial);
+    this.nodesMesh = new THREE.Points(this.nodesGeometry, this.nodesMaterial!);
     this.group.add(this.nodesMesh);
   }
 
@@ -398,17 +407,32 @@ export class NeuralNetworkBackground {
     this.packetsGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     this.packetsGeometry.setAttribute('opacity', new THREE.BufferAttribute(opacities, 1));
 
-    this.packetsMaterial = new THREE.ShaderMaterial({
-      vertexShader: packetVertexShader,
-      fragmentShader: packetFragmentShader,
-      uniforms: {
-        packetColor: { value: this.hexToVec3(config.colors.packet) }
-      },
-      transparent: true,
-      blending: THREE.AdditiveBlending
-    });
+    // Temporarily disable shader material to debug WebGL errors
+    // TODO: Re-enable after fixing uniform/matrix issues
+    const useShaders = false;
+    
+    if (useShaders) {
+      this.packetsMaterial = new THREE.ShaderMaterial({
+        vertexShader: packetVertexShader,
+        fragmentShader: packetFragmentShader,
+        uniforms: {
+          packetColor: { value: this.hexToVec3(config.colors.packet) }
+        },
+        transparent: true,
+        blending: THREE.AdditiveBlending
+      });
+    } else {
+      // Use basic point material
+      this.packetsMaterial = new THREE.PointsMaterial({
+        color: new THREE.Color(config.colors.packet),
+        transparent: true,
+        opacity: 0.9,
+        size: 1.5,
+        sizeAttenuation: true
+      }) as any; // Type assertion to match expected ShaderMaterial type
+    }
 
-    this.packetsMesh = new THREE.Points(this.packetsGeometry, this.packetsMaterial);
+    this.packetsMesh = new THREE.Points(this.packetsGeometry, this.packetsMaterial!);
     this.group.add(this.packetsMesh);
   }
 
@@ -510,18 +534,16 @@ export class NeuralNetworkBackground {
       // Just update material properties for visual changes
       this.updateMaterials(neuralConfig);
     }
-
-    console.log('NeuralNetworkBackground config updated:', neuralConfig);
   }
 
   private updateMaterials(neuralConfig: Partial<NonNullable<AnimatedConfig['neural']>>): void {
     // Update materials if colors changed
-    if (neuralConfig.colors && this.nodesMaterial) {
+    if (neuralConfig.colors && this.nodesMaterial && this.nodesMaterial.uniforms) {
       this.nodesMaterial.uniforms.nodeCore.value.copy(this.hexToVec3(neuralConfig.colors.nodeCore));
       this.nodesMaterial.uniforms.nodeGlow.value.copy(this.hexToVec3(neuralConfig.colors.nodeGlow));
     }
 
-    if (neuralConfig.colors && this.packetsMaterial) {
+    if (neuralConfig.colors && this.packetsMaterial && this.packetsMaterial.uniforms) {
       this.packetsMaterial.uniforms.packetColor.value.copy(this.hexToVec3(neuralConfig.colors.packet));
     }
 

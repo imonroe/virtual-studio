@@ -13,16 +13,12 @@ export class ImageBackground {
   }
 
   async create(): Promise<THREE.Mesh> {
-    console.log('Creating ImageBackground with config:', this.config);
-    
-    // TEMP DEBUG: Create a simple test cube that should definitely be visible
-    console.log('CREATING SIMPLE RED TEST CUBE');
+    // Create a simple test cube
     this.geometry = new THREE.BoxGeometry(1, 1, 1);
     this.material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Bright red
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.position.set(0, 0, 1); // Put it in front of camera
 
-    console.log('RED TEST CUBE created at position:', this.mesh.position);
     return this.mesh;
   }
 
@@ -42,17 +38,9 @@ export class ImageBackground {
           this.texture.magFilter = THREE.LinearFilter;
           this.texture.wrapS = THREE.ClampToEdgeWrapping;
           this.texture.wrapT = THREE.ClampToEdgeWrapping;
-          console.log('Image texture loaded successfully:', {
-            width: texture.image.width,
-            height: texture.image.height,
-            format: texture.format,
-            type: texture.type
-          });
           resolve();
         },
-        (progress) => {
-          console.log('Loading image texture...', progress);
-        },
+        undefined,
         (error) => {
           console.error('Failed to load image texture:', error);
           this.texture = null;
@@ -64,17 +52,11 @@ export class ImageBackground {
 
   private applyImageFit(): void {
     if (!this.texture || !this.mesh) {
-      console.log('Cannot apply image fit - missing texture or mesh:', { 
-        hasTexture: !!this.texture, 
-        hasMesh: !!this.mesh 
-      });
       return;
     }
 
-    console.log('Applying image fit:', this.config.fit);
     const imageAspect = this.texture.image.width / this.texture.image.height;
     const stageAspect = 16 / 9; // Our stage is 16:9
-    console.log('Image aspect:', imageAspect, 'Stage aspect:', stageAspect);
 
     switch (this.config.fit) {
       case 'cover': {
@@ -87,10 +69,8 @@ export class ImageBackground {
         } else {
           // Image is taller, scale based on width
           const scale = imageAspect / stageAspect;
-          console.log('Image is taller than stage, applying scale:', scale);
           this.texture.repeat.set(1, scale);
           this.texture.offset.set(0, (1 - scale) / 2);
-          console.log('Texture repeat:', this.texture.repeat, 'offset:', this.texture.offset);
         }
         break;
       }

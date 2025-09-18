@@ -28,8 +28,10 @@ export const CSSGradientBackground: React.FC<CSSGradientBackgroundProps> = ({ co
     }
     
     return {
-      background: gradient,
+      backgroundImage: gradient,
       backgroundSize: config.animated ? '200% 200%' : '100% 100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
       animationDuration: config.animated ? `${20 / config.animationSpeed}s` : undefined
     };
   }, [config]);

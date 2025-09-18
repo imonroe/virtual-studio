@@ -43,12 +43,15 @@ export const CSSWavesBackground: React.FC<CSSWavesBackgroundProps> = ({ config }
           width: '100%',
           height: '100%',
           opacity: 0.6 - (index * 0.1),
-          background: `linear-gradient(90deg, 
+          backgroundImage: `linear-gradient(90deg, 
             transparent, 
             ${backgroundColor}40, 
             transparent)`,
           transform: `translateY(${index * 5}px)`,
-          animation: `waveMotion${index} ${animationDuration} ease-in-out infinite`,
+          animationName: `waveMotion${index}`,
+          animationDuration: animationDuration,
+          animationTimingFunction: 'ease-in-out',
+          animationIterationCount: 'infinite',
           animationDelay: `${index * 0.2}s`,
         }}
       />

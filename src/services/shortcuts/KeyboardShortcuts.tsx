@@ -112,21 +112,12 @@ const useKeyboardShortcuts = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log('🎹 Key pressed:', {
-        key: event.key,
-        ctrlKey: event.ctrlKey,
-        shiftKey: event.shiftKey,
-        altKey: event.altKey,
-        target: event.target?.constructor.name
-      });
-
       // Don't trigger shortcuts if user is typing in an input
       if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement ||
         event.target instanceof HTMLSelectElement
       ) {
-        console.log('🎹 Ignoring key press - user typing in input field');
         return;
       }
 
@@ -139,11 +130,8 @@ const useKeyboardShortcuts = () => {
         return keyMatch && ctrlMatch && shiftMatch && altMatch;
       });
 
-      console.log('🎹 Found shortcut:', shortcut ? shortcut.description : 'None');
-
       if (shortcut) {
         event.preventDefault();
-        console.log('🎹 Executing shortcut:', shortcut.description);
         
         // Visual feedback for shortcut activation
         const notification = document.createElement('div');
@@ -187,11 +175,9 @@ const useKeyboardShortcuts = () => {
       }
     };
 
-    console.log('🎹 Keyboard shortcuts initialized with', shortcuts.length, 'shortcuts');
     document.addEventListener('keydown', handleKeyDown);
     
     return () => {
-      console.log('🎹 Keyboard shortcuts cleanup');
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [shortcuts]);

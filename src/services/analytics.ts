@@ -31,10 +31,9 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       
       this.config = { ...config };
       
-      // Check if gtag is available
+      // Load gtag script if not already loaded
       if (!window.gtag) {
-        console.warn('[Analytics] gtag is not available. Analytics tracking disabled.');
-        return;
+        await this.loadGtagScript(config.measurementId);
       }
       
       // Configure gtag with consent mode
@@ -47,13 +46,43 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       
       this.initialized = true;
       
-      if (config.debug) {
-        console.log('[Analytics] Initialized successfully with measurement ID:', config.measurementId);
-      }
     } catch (error) {
       console.error('[Analytics] Initialization failed:', error);
       throw error;
     }
+  }
+
+  private async loadGtagScript(measurementId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Initialize dataLayer if not exists
+      window.dataLayer = window.dataLayer || [];
+      
+      // Create gtag function
+      function gtag(...args: any[]): void {
+        window.dataLayer?.push(args);
+      }
+      window.gtag = gtag;
+      
+      // Load gtag script
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+      script.onload = () => {
+        // Initialize gtag
+        window.gtag('js', new Date());
+        window.gtag('config', measurementId, {
+          send_page_view: false, // We'll handle page views manually
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false
+        });
+        resolve();
+      };
+      script.onerror = () => {
+        reject(new Error('Failed to load Google Analytics script'));
+      };
+      
+      document.head.appendChild(script);
+    });
   }
 
   async trackPageView(pageTitle: string, pageLocation: string): Promise<void> {
@@ -104,9 +133,6 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       // Track event with gtag
       window.gtag('event', event.eventName, event.parameters || {});
       
-      if (this.config?.debug) {
-        console.log('[Analytics] Event tracked:', event.eventName, event.parameters);
-      }
     } catch (error) {
       console.warn('[Analytics] Event tracking failed:', error);
     }
@@ -141,9 +167,6 @@ export class AnalyticsServiceImpl implements AnalyticsService {
         this.config.consentGiven = consent.analyticsStorage;
       }
       
-      if (this.config?.debug) {
-        console.log('[Analytics] Consent updated:', consent);
-      }
     } catch (error) {
       console.error('[Analytics] Failed to update consent:', error);
       throw error;
@@ -177,7 +200,6 @@ export class AnalyticsServiceImpl implements AnalyticsService {
     this.initialized = false;
     
     // Note: We don't clear gtag or consent as they might be needed after shutdown
-    console.log('[Analytics] Service shutdown');
   }
 }
 
@@ -206,8 +228,6 @@ export function getEnvironmentConfig(): { measurementId?: string; debug?: boolea
     console.warn('⚠️  [Analytics] VITE_GA_MEASUREMENT_ID not configured for production build. Analytics will be disabled.');
   } else if (measurementId && !isValidMeasurementId(measurementId)) {
     console.warn('⚠️  [Analytics] Invalid VITE_GA_MEASUREMENT_ID format. Expected format: G-XXXXXXXXXX');
-  } else if (debug && measurementId) {
-    console.log('✅ [Analytics] Analytics configured with measurement ID:', measurementId);
   }
   
   return {

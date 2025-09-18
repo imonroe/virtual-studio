@@ -35,10 +35,9 @@ void main() {
 }
 `;
 
-console.log('Using inline shaders');
 
 export class GradientBackground {
-  private mesh: THREE.Mesh | null = null;
+  private mesh: THREE.Object3D | null = null;
   private material: THREE.ShaderMaterial | THREE.MeshBasicMaterial | null = null;
   private geometry: THREE.PlaneGeometry | null = null;
   private config: GradientConfig;
@@ -56,45 +55,62 @@ export class GradientBackground {
     // Parse colors and convert to vec3
     const colors = this.config.colors.map(this.hexToVec3);
     
-    // Try to create shader material, fallback to basic material
-    // TEMP DEBUG: Force basic material instead of shader to fix WebGL errors
-    if (vertexShader && fragmentShader) {
-      console.log('Creating shader material with GLSL shaders');
+    // Temporarily disable shader materials to debug WebGL errors
+    // TODO: Re-enable after fixing uniform/matrix issues
+    const useShaders = false;
+    
+    if (useShaders && vertexShader && fragmentShader) {
       this.material = new THREE.ShaderMaterial({
         vertexShader,
         fragmentShader,
-        uniforms: {
-          colorA: { value: colors[0] || new THREE.Vector3(0.1, 0.1, 0.2) },
-          colorB: { value: colors[1] || new THREE.Vector3(0.2, 0.2, 0.4) },
-          time: { value: 0.0 },
-          animationSpeed: { value: this.config.animationSpeed || 0.5 }
-        },
+        uniforms: THREE.UniformsUtils.merge([
+          THREE.UniformsLib.common,
+          {
+            colorA: { value: colors[0] || new THREE.Vector3(0.1, 0.1, 0.2) },
+            colorB: { value: colors[1] || new THREE.Vector3(0.2, 0.2, 0.4) },
+            time: { value: 0.0 },
+            animationSpeed: { value: this.config.animationSpeed || 0.5 }
+          }
+        ]),
         side: THREE.DoubleSide,
         transparent: false
       });
     } else {
-      console.log('Falling back to basic material');
-      // Fallback to basic material
+      // Use simple colored material without textures to avoid shader compilation
+      const avgColor = new THREE.Color(
+        (colors[0].x + colors[1].x) / 2,
+        (colors[0].y + colors[1].y) / 2, 
+        (colors[0].z + colors[1].z) / 2
+      );
       this.material = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(this.config.colors[0] || '#1a1a2e'),
+        color: avgColor,
         side: THREE.DoubleSide
       });
     }
 
-    this.mesh = new THREE.Mesh(this.geometry, this.material!);
-    this.mesh.position.z = -1; // Place behind other elements
+    // Temporarily disable mesh creation to isolate the matrix error source
+    console.log('🔍 DEBUG: Material created, skipping mesh creation to test matrix errors');
+    
+    // Create a minimal empty object instead of a mesh
+    this.mesh = new THREE.Object3D();
+    this.mesh.position.z = -1;
 
-    console.log('GradientBackground mesh created:', this.mesh);
-    return this.mesh;
+    return this.mesh as any; // Type assertion for simplified Object3D
   }
 
   update(_deltaTime: number): void {
-    if (!this.material || !this.config.animated) return;
+    if (!this.material || !this.mesh || !this.config.animated) return;
 
     // Update animation uniforms if they exist (shader material only)
-    if (this.material instanceof THREE.ShaderMaterial && this.material.uniforms && this.material.uniforms.time) {
-      const currentTime = performance.now() / 1000;
-      this.material.uniforms.time.value = currentTime - this.startTime;
+    try {
+      if (this.material instanceof THREE.ShaderMaterial && 
+          this.material.uniforms && 
+          this.material.uniforms.time) {
+        const currentTime = performance.now() / 1000;
+        this.material.uniforms.time.value = currentTime - this.startTime;
+      }
+    } catch (error) {
+      // Silently handle WebGL errors during disposal
     }
   }
 
@@ -131,6 +147,7 @@ export class GradientBackground {
     return new THREE.Vector3(color.r, color.g, color.b);
   }
 
+
   // private getGradientTypeValue(): number {
   //   switch (this.config.type) {
   //     case 'linear': return 0;
@@ -154,7 +171,7 @@ export class GradientBackground {
     this.mesh = null;
   }
 
-  getMesh(): THREE.Mesh | null {
+  getMesh(): THREE.Object3D | null {
     return this.mesh;
   }
 }

@@ -17,8 +17,10 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
 
   useEffect(() => {
     if (textRef.current && containerRef.current) {
-      setScrollWidth(textRef.current.scrollWidth);
-      setContainerWidth(containerRef.current.offsetWidth);
+      const newScrollWidth = textRef.current.scrollWidth;
+      const newContainerWidth = containerRef.current.offsetWidth;
+      setScrollWidth(newScrollWidth);
+      setContainerWidth(newContainerWidth);
     }
   }, [tickerContent, config.fontSize]);
 
@@ -30,11 +32,16 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
       element.style.setProperty('--text-color', config.textColor);
       element.style.setProperty('--font-size', `${config.fontSize}px`);
       
-      // Calculate animation duration based on content length and speed (px per second)
-      // Use total content width + container width for smooth looping
-      const totalDistance = scrollWidth + containerWidth;
-      const duration = totalDistance / config.speed;
-      element.style.setProperty('--animation-duration', `${Math.max(duration, 5)}s`);
+      // Calculate animation duration for seamless looping
+      // For seamless looping with pixel-based animation, the text needs to move
+      // from its starting position until the second copy appears in the first copy's place
+      const loopDistance = scrollWidth + 40; // text width + margin for seamless transition
+      const duration = loopDistance / config.speed;
+      const finalDuration = Math.max(duration, 2);
+      
+      // Set CSS custom properties for pixel-based animation
+      element.style.setProperty('--animation-duration', `${finalDuration}s`);
+      element.style.setProperty('--loop-distance', `-${loopDistance}px`);
     }
   }, [config, scrollWidth, containerWidth]);
 

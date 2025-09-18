@@ -55,8 +55,12 @@ export class WebGLRenderer extends BaseRenderer {
 
     this.updateStats(deltaTime);
     
-    // Render the scene
-    this.renderer.render(this.scene, this.camera);
+    try {
+      // Render the scene
+      this.renderer.render(this.scene, this.camera);
+    } catch (error) {
+      console.error('🔍 WebGL: Render error:', error);
+    }
   }
 
   protected onResize(width: number, height: number): void {
