@@ -35,7 +35,10 @@
       "WebSearch",
       "Bash(npm search:*)",
       "Bash(npm test:*)",
-      "Bash(npm run test:run:*)"
+      "Bash(npm run test:run:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh:*)",
+      "Bash(.specify/scripts/bash/check-task-prerequisites.sh:*)"
     ],
     "deny": [],
     "ask": []
