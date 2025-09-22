@@ -65,9 +65,9 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       // Initialize dataLayer if not exists
       window.dataLayer = window.dataLayer || [];
       
-      // Create gtag function
-      function gtag(...args: any[]): void {
-        window.dataLayer?.push(args);
+      // Create gtag function exactly as Google specifies
+      function gtag(){
+        window.dataLayer?.push(arguments);
       }
       window.gtag = gtag;
       
@@ -76,14 +76,10 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
       script.onload = () => {
-        // Initialize gtag
+        // Initialize gtag exactly as Google specifies
         if (window.gtag) {
           window.gtag('js', new Date());
-          window.gtag('config', measurementId, {
-            send_page_view: false, // We'll handle page views manually
-            allow_google_signals: false,
-            allow_ad_personalization_signals: false
-          });
+          window.gtag('config', measurementId);
         }
         resolve();
       };

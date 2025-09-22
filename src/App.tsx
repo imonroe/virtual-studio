@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Studio } from './pages/Studio';
@@ -10,37 +10,8 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { getEnvironmentConfig } from '@/services/analytics';
 import './App.css';
 
-// Analytics tracking component for route changes
-function AnalyticsTracker() {
-  const location = useLocation();
-  const analytics = useAnalytics();
-
-  useEffect(() => {
-    // Track page view on route change
-    if (analytics.isReady && analytics.hasConsent) {
-      const pageTitle = getPageTitle(location.pathname);
-      analytics.trackPageView(pageTitle, window.location.href);
-    }
-  }, [location.pathname, analytics]);
-
-  return null;
-}
-
-// Get page title based on route
-function getPageTitle(pathname: string): string {
-  switch (pathname) {
-    case '/':
-      return 'Virtual Studio - Home';
-    case '/app':
-      return 'Virtual Studio - Application';
-    case '/feedback':
-      return 'Virtual Studio - Feedback';
-    case '/docs':
-      return 'Virtual Studio - Documentation';
-    default:
-      return 'Virtual Studio';
-  }
-}
+// Note: Page view tracking is now handled automatically by Google Analytics
+// No manual tracking needed with default gtag configuration
 
 // Main app content with analytics
 function AppContent() {
@@ -71,7 +42,6 @@ function AppContent() {
 
   return (
     <>
-      <AnalyticsTracker />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/app" element={<Studio />} />
