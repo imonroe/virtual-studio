@@ -35,13 +35,13 @@ export function useAnalytics(): UseAnalyticsReturn {
           return;
         }
 
-        // Load existing consent
+        // Load existing consent - default to TRUE (opt-out model)
         const existingConsent = loadConsent();
-        const consentGiven = existingConsent?.analyticsStorage || false;
-        
+        const consentGiven = existingConsent?.analyticsStorage !== false; // Only false if explicitly declined
+
         setHasConsent(consentGiven);
 
-        // Initialize analytics service if consent given
+        // Initialize analytics unless explicitly declined
         if (consentGiven) {
           await analyticsService.initialize({
             measurementId,
@@ -49,12 +49,14 @@ export function useAnalytics(): UseAnalyticsReturn {
             consentGiven: true,
             debug
           });
-          
+
           setIsReady(true);
 
           if (debug) {
-            console.log('✅ [useAnalytics] Analytics initialized with existing consent');
+            console.log('✅ [useAnalytics] Analytics initialized (opt-out model - collecting by default)');
           }
+        } else if (debug) {
+          console.log('🚫 [useAnalytics] Analytics disabled - user explicitly declined');
         }
       } catch (error) {
         console.error('[useAnalytics] Initialization failed:', error);

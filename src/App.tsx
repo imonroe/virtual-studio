@@ -49,18 +49,23 @@ function AppContent() {
   const { measurementId } = getEnvironmentConfig();
 
   useEffect(() => {
-    // Show consent banner if we have a measurement ID but no consent
-    if (measurementId && !analytics.hasConsent) {
+    // Show consent banner if we have a measurement ID and haven't shown it before
+    const hasSeenBanner = localStorage.getItem('analytics-banner-seen');
+    if (measurementId && !hasSeenBanner) {
       setShowConsentBanner(true);
     }
-  }, [measurementId, analytics.hasConsent]);
+  }, [measurementId]);
 
   const handleConsentAccept = () => {
-    analytics.requestConsent();
+    // User accepts - analytics already running by default, just hide banner
+    localStorage.setItem('analytics-banner-seen', 'true');
     setShowConsentBanner(false);
   };
 
   const handleConsentDecline = () => {
+    // User opts out - disable analytics and hide banner
+    analytics.withdrawConsent();
+    localStorage.setItem('analytics-banner-seen', 'true');
     setShowConsentBanner(false);
   };
 
@@ -80,9 +85,9 @@ function AppContent() {
         isVisible={showConsentBanner}
         onAccept={handleConsentAccept}
         onDecline={handleConsentDecline}
-        message="We use analytics to improve Virtual Studio. This helps us understand how you use the application and make it better."
-        acceptText="Accept Analytics"
-        declineText="No Thanks"
+        message="We're collecting anonymous usage analytics to improve Virtual Studio. You can opt out at any time."
+        acceptText="Continue with Analytics"
+        declineText="Opt Out"
       />
     </>
   );
