@@ -25,7 +25,7 @@ export function useAnalytics(): UseAnalyticsReturn {
         // Check if measurement ID is configured and valid
         if (!measurementId) {
           if (debug) {
-            console.warn('[useAnalytics] No measurement ID configured');
+            console.info('📊 [useAnalytics] No measurement ID configured - analytics disabled');
           }
           return;
         }
@@ -51,9 +51,9 @@ export function useAnalytics(): UseAnalyticsReturn {
           });
           
           setIsReady(true);
-          
+
           if (debug) {
-            console.log('[useAnalytics] Analytics initialized with existing consent');
+            console.log('✅ [useAnalytics] Analytics initialized with existing consent');
           }
         }
       } catch (error) {
@@ -103,7 +103,7 @@ export function useAnalytics(): UseAnalyticsReturn {
       setHasConsent(true);
       
       if (debug) {
-        console.log('[useAnalytics] Consent granted and analytics initialized');
+        console.log('✅ [useAnalytics] Consent granted and analytics initialized');
       }
     } catch (error) {
       console.error('[useAnalytics] Failed to grant consent:', error);

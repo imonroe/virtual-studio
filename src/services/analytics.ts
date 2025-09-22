@@ -224,14 +224,30 @@ export function isValidMeasurementId(measurementId: string): boolean {
 export function getEnvironmentConfig(): { measurementId?: string; debug?: boolean } {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   const debug = import.meta.env.VITE_GA_DEBUG === 'true' || import.meta.env.NODE_ENV === 'development';
-  
+
+  // Enhanced logging for debugging
+  if (debug) {
+    console.log('📊 [Analytics] Environment configuration:', {
+      measurementId: measurementId ? `${measurementId.substring(0, 5)}...` : 'NOT SET',
+      debug: debug,
+      nodeEnv: import.meta.env.NODE_ENV,
+      mode: import.meta.env.MODE
+    });
+  }
+
   // Validate environment configuration
   if (import.meta.env.NODE_ENV === 'production' && !measurementId) {
     console.warn('⚠️  [Analytics] VITE_GA_MEASUREMENT_ID not configured for production build. Analytics will be disabled.');
+  } else if (!measurementId) {
+    if (debug) {
+      console.info('ℹ️  [Analytics] VITE_GA_MEASUREMENT_ID not set. Analytics will be disabled. Set this in .env file for development.');
+    }
   } else if (measurementId && !isValidMeasurementId(measurementId)) {
     console.warn('⚠️  [Analytics] Invalid VITE_GA_MEASUREMENT_ID format. Expected format: G-XXXXXXXXXX');
+  } else if (debug) {
+    console.log('✅ [Analytics] Valid measurement ID configured');
   }
-  
+
   return {
     measurementId,
     debug
