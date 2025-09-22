@@ -26,16 +26,24 @@ export class AnalyticsServiceImpl implements AnalyticsService {
 
   async initialize(config: AnalyticsConfig): Promise<void> {
     try {
+      // Prevent multiple initializations
+      if (this.initialized) {
+        if (config.debug) {
+          console.log('🔄 [Analytics] Already initialized, skipping');
+        }
+        return;
+      }
+
       // Validate configuration
       validateAnalyticsConfig(config);
-      
+
       this.config = { ...config };
-      
+
       // Load gtag script if not already loaded
       if (!window.gtag) {
         await this.loadGtagScript(config.measurementId);
       }
-      
+
       // Configure gtag with consent mode
       if (config.consentGiven && window.gtag) {
         window.gtag('consent', 'update', {
@@ -43,8 +51,12 @@ export class AnalyticsServiceImpl implements AnalyticsService {
           ad_storage: 'denied' // We only use analytics, not ads
         });
       }
-      
+
       this.initialized = true;
+
+      if (config.debug) {
+        console.log('✅ [Analytics] Service initialized successfully');
+      }
       
     } catch (error) {
       console.error('[Analytics] Initialization failed:', error);
@@ -221,18 +233,22 @@ export function isValidMeasurementId(measurementId: string): boolean {
   return /^G-[A-Z0-9]{10}$/.test(measurementId);
 }
 
+// Flag to prevent multiple environment config logs
+let hasLoggedConfig = false;
+
 export function getEnvironmentConfig(): { measurementId?: string; debug?: boolean } {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   const debug = import.meta.env.VITE_GA_DEBUG === 'true' || import.meta.env.NODE_ENV === 'development';
 
-  // Enhanced logging for debugging
-  if (debug) {
+  // Enhanced logging for debugging (only once)
+  if (debug && !hasLoggedConfig) {
     console.log('📊 [Analytics] Environment configuration:', {
       measurementId: measurementId ? `${measurementId.substring(0, 5)}...` : 'NOT SET',
       debug: debug,
       nodeEnv: import.meta.env.NODE_ENV,
       mode: import.meta.env.MODE
     });
+    hasLoggedConfig = true;
   }
 
   // Validate environment configuration

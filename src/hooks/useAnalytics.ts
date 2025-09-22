@@ -14,7 +14,8 @@ const CONSENT_STORAGE_KEY = 'ga-consent-state';
 export function useAnalytics(): UseAnalyticsReturn {
   const [isReady, setIsReady] = useState(false);
   const [hasConsent, setHasConsent] = useState(false);
-  
+  const [isInitializing, setIsInitializing] = useState(false);
+
   const analyticsService = getAnalyticsService();
   const { measurementId, debug } = getEnvironmentConfig();
 
@@ -22,16 +23,25 @@ export function useAnalytics(): UseAnalyticsReturn {
   useEffect(() => {
     const initializeAnalytics = async () => {
       try {
+        // Prevent multiple simultaneous initializations
+        if (isInitializing || isReady) {
+          return;
+        }
+
+        setIsInitializing(true);
+
         // Check if measurement ID is configured and valid
         if (!measurementId) {
           if (debug) {
             console.info('📊 [useAnalytics] No measurement ID configured - analytics disabled');
           }
+          setIsInitializing(false);
           return;
         }
 
         if (!isValidMeasurementId(measurementId)) {
           console.warn('[useAnalytics] Invalid measurement ID format:', measurementId);
+          setIsInitializing(false);
           return;
         }
 
@@ -60,11 +70,13 @@ export function useAnalytics(): UseAnalyticsReturn {
         }
       } catch (error) {
         console.error('[useAnalytics] Initialization failed:', error);
+      } finally {
+        setIsInitializing(false);
       }
     };
 
     initializeAnalytics();
-  }, [measurementId, debug, analyticsService]);
+  }, [measurementId, debug, isInitializing, isReady]); // Remove analyticsService from deps as it's a singleton
 
   // Load consent from localStorage
   const loadConsent = useCallback((): ConsentState | null => {
