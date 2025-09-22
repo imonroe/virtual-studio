@@ -14,7 +14,8 @@ const CONSENT_STORAGE_KEY = 'ga-consent-state';
 export function useAnalytics(): UseAnalyticsReturn {
   const [isReady, setIsReady] = useState(false);
   const [hasConsent, setHasConsent] = useState(false);
-  
+  const [isInitializing, setIsInitializing] = useState(false);
+
   const analyticsService = getAnalyticsService();
   const { measurementId, debug } = getEnvironmentConfig();
 
@@ -22,26 +23,35 @@ export function useAnalytics(): UseAnalyticsReturn {
   useEffect(() => {
     const initializeAnalytics = async () => {
       try {
+        // Prevent multiple simultaneous initializations
+        if (isInitializing || isReady) {
+          return;
+        }
+
+        setIsInitializing(true);
+
         // Check if measurement ID is configured and valid
         if (!measurementId) {
           if (debug) {
-            console.warn('[useAnalytics] No measurement ID configured');
+            console.info('📊 [useAnalytics] No measurement ID configured - analytics disabled');
           }
+          setIsInitializing(false);
           return;
         }
 
         if (!isValidMeasurementId(measurementId)) {
           console.warn('[useAnalytics] Invalid measurement ID format:', measurementId);
+          setIsInitializing(false);
           return;
         }
 
-        // Load existing consent
+        // Load existing consent - default to TRUE (opt-out model)
         const existingConsent = loadConsent();
-        const consentGiven = existingConsent?.analyticsStorage || false;
-        
+        const consentGiven = existingConsent?.analyticsStorage !== false; // Only false if explicitly declined
+
         setHasConsent(consentGiven);
 
-        // Initialize analytics service if consent given
+        // Initialize analytics unless explicitly declined
         if (consentGiven) {
           await analyticsService.initialize({
             measurementId,
@@ -49,20 +59,24 @@ export function useAnalytics(): UseAnalyticsReturn {
             consentGiven: true,
             debug
           });
-          
+
           setIsReady(true);
-          
+
           if (debug) {
-            console.log('[useAnalytics] Analytics initialized with existing consent');
+            console.log('✅ [useAnalytics] Analytics initialized (opt-out model - collecting by default)');
           }
+        } else if (debug) {
+          console.log('🚫 [useAnalytics] Analytics disabled - user explicitly declined');
         }
       } catch (error) {
         console.error('[useAnalytics] Initialization failed:', error);
+      } finally {
+        setIsInitializing(false);
       }
     };
 
     initializeAnalytics();
-  }, [measurementId, debug, analyticsService]);
+  }, [measurementId, debug, isInitializing, isReady]); // Remove analyticsService from deps as it's a singleton
 
   // Load consent from localStorage
   const loadConsent = useCallback((): ConsentState | null => {
@@ -103,7 +117,7 @@ export function useAnalytics(): UseAnalyticsReturn {
       setHasConsent(true);
       
       if (debug) {
-        console.log('[useAnalytics] Consent granted and analytics initialized');
+        console.log('✅ [useAnalytics] Consent granted and analytics initialized');
       }
     } catch (error) {
       console.error('[useAnalytics] Failed to grant consent:', error);

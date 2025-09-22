@@ -26,16 +26,24 @@ export class AnalyticsServiceImpl implements AnalyticsService {
 
   async initialize(config: AnalyticsConfig): Promise<void> {
     try {
+      // Prevent multiple initializations
+      if (this.initialized) {
+        if (config.debug) {
+          console.log('🔄 [Analytics] Already initialized, skipping');
+        }
+        return;
+      }
+
       // Validate configuration
       validateAnalyticsConfig(config);
-      
+
       this.config = { ...config };
-      
+
       // Load gtag script if not already loaded
       if (!window.gtag) {
         await this.loadGtagScript(config.measurementId);
       }
-      
+
       // Configure gtag with consent mode
       if (config.consentGiven && window.gtag) {
         window.gtag('consent', 'update', {
@@ -43,7 +51,7 @@ export class AnalyticsServiceImpl implements AnalyticsService {
           ad_storage: 'denied' // We only use analytics, not ads
         });
       }
-      
+
       this.initialized = true;
       
     } catch (error) {
@@ -221,17 +229,39 @@ export function isValidMeasurementId(measurementId: string): boolean {
   return /^G-[A-Z0-9]{10}$/.test(measurementId);
 }
 
+// Flag to prevent multiple environment config logs
+let hasLoggedConfig = false;
+
 export function getEnvironmentConfig(): { measurementId?: string; debug?: boolean } {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   const debug = import.meta.env.VITE_GA_DEBUG === 'true' || import.meta.env.NODE_ENV === 'development';
-  
-  // Validate environment configuration
+
+  // Enhanced logging for debugging (only once)
+  if (debug && !hasLoggedConfig) {
+    console.log('📊 [Analytics] Environment configuration:', {
+      measurementId: measurementId ? `${measurementId.substring(0, 5)}...` : 'NOT SET',
+      debug: debug,
+      nodeEnv: import.meta.env.NODE_ENV,
+      mode: import.meta.env.MODE
+    });
+
+    // Validate and log measurement ID status (only once)
+    if (measurementId && isValidMeasurementId(measurementId)) {
+      console.log('✅ [Analytics] Valid measurement ID configured');
+    }
+
+    hasLoggedConfig = true;
+  }
+
+  // Validate environment configuration (warnings only)
   if (import.meta.env.NODE_ENV === 'production' && !measurementId) {
     console.warn('⚠️  [Analytics] VITE_GA_MEASUREMENT_ID not configured for production build. Analytics will be disabled.');
+  } else if (!measurementId && debug && !hasLoggedConfig) {
+    console.info('ℹ️  [Analytics] VITE_GA_MEASUREMENT_ID not set. Analytics will be disabled. Set this in .env file for development.');
   } else if (measurementId && !isValidMeasurementId(measurementId)) {
     console.warn('⚠️  [Analytics] Invalid VITE_GA_MEASUREMENT_ID format. Expected format: G-XXXXXXXXXX');
   }
-  
+
   return {
     measurementId,
     debug

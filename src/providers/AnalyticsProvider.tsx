@@ -5,7 +5,7 @@
  * Provides analytics functionality throughout the application.
  */
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import type { AnalyticsProviderProps, AnalyticsContextValue } from '@/types/analytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
@@ -13,20 +13,12 @@ const AnalyticsContext = createContext<AnalyticsContextValue | null>(null);
 
 export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
   children,
-  measurementId,
-  onConsentRequired,
   onError
 }) => {
   const analytics = useAnalytics();
 
-  // Check if consent is needed on mount
-  useEffect(() => {
-    // If analytics is not ready and we have a measurement ID but no consent,
-    // trigger consent required callback
-    if (measurementId && !analytics.isReady && !analytics.hasConsent) {
-      onConsentRequired?.();
-    }
-  }, [measurementId, analytics.isReady, analytics.hasConsent, onConsentRequired]);
+  // Note: With opt-out model, we no longer need to trigger consent required
+  // Analytics initialize by default, consent callbacks are only for explicit opt-out
 
   // Handle consent request
   const handleRequestConsent = () => {
