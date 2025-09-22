@@ -94,23 +94,12 @@ function AppContent() {
 }
 
 function App() {
-  const { measurementId, debug } = getEnvironmentConfig();
-
-  const handleConsentRequired = () => {
-    if (debug) {
-      console.log('[App] Consent required for analytics');
-    }
-  };
-
   const handleAnalyticsError = (error: Error) => {
     console.warn('[App] Analytics error:', error);
   };
 
   return (
     <AnalyticsProvider
-      measurementId={measurementId}
-      debug={debug}
-      onConsentRequired={handleConsentRequired}
       onError={handleAnalyticsError}
     >
       <Router>

@@ -53,10 +53,6 @@ export class AnalyticsServiceImpl implements AnalyticsService {
       }
 
       this.initialized = true;
-
-      if (config.debug) {
-        console.log('✅ [Analytics] Service initialized successfully');
-      }
       
     } catch (error) {
       console.error('[Analytics] Initialization failed:', error);
@@ -248,20 +244,22 @@ export function getEnvironmentConfig(): { measurementId?: string; debug?: boolea
       nodeEnv: import.meta.env.NODE_ENV,
       mode: import.meta.env.MODE
     });
+
+    // Validate and log measurement ID status (only once)
+    if (measurementId && isValidMeasurementId(measurementId)) {
+      console.log('✅ [Analytics] Valid measurement ID configured');
+    }
+
     hasLoggedConfig = true;
   }
 
-  // Validate environment configuration
+  // Validate environment configuration (warnings only)
   if (import.meta.env.NODE_ENV === 'production' && !measurementId) {
     console.warn('⚠️  [Analytics] VITE_GA_MEASUREMENT_ID not configured for production build. Analytics will be disabled.');
-  } else if (!measurementId) {
-    if (debug) {
-      console.info('ℹ️  [Analytics] VITE_GA_MEASUREMENT_ID not set. Analytics will be disabled. Set this in .env file for development.');
-    }
+  } else if (!measurementId && debug && !hasLoggedConfig) {
+    console.info('ℹ️  [Analytics] VITE_GA_MEASUREMENT_ID not set. Analytics will be disabled. Set this in .env file for development.');
   } else if (measurementId && !isValidMeasurementId(measurementId)) {
     console.warn('⚠️  [Analytics] Invalid VITE_GA_MEASUREMENT_ID format. Expected format: G-XXXXXXXXXX');
-  } else if (debug) {
-    console.log('✅ [Analytics] Valid measurement ID configured');
   }
 
   return {
