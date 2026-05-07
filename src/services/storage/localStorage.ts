@@ -1,4 +1,4 @@
-import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, StudioPreset, ImageConfig, LogoConfig } from '@/types/studio';
+import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, StudioPreset, ImageConfig, LogoConfig, GradientConfig } from '@/types/studio';
 
 const STORAGE_KEY = 'virtual-studio-state';
 const STORAGE_VERSION = '1.0';
@@ -6,6 +6,27 @@ const STORAGE_VERSION = '1.0';
 // Data URLs (base64) can be megabytes each. localStorage typically caps at 5-10MB total,
 // so anything above this threshold is dropped on quota fallback to keep settings persisting.
 const DATA_URL_PERSIST_THRESHOLD = 200 * 1024;
+
+// Standard QuotaExceededError DOMException codes across browsers
+const QUOTA_ERROR_CODES = new Set([22, 1014]);
+const QUOTA_ERROR_NAMES = new Set([
+  'QuotaExceededError',
+  'NS_ERROR_DOM_QUOTA_REACHED',
+]);
+
+// Fallback gradient used when an image background must be dropped on quota failure.
+const fallbackGradientBackground: StudioBackground = {
+  id: 'default-bg',
+  type: 'gradient',
+  visible: true,
+  config: {
+    colors: ['#1a1a2e', '#16213e', '#0f3460'],
+    angle: 135,
+    type: 'linear',
+    animated: true,
+    animationSpeed: 0.5,
+  } as GradientConfig,
+};
 
 export interface SavedStudioState {
   background: StudioBackground;
@@ -28,14 +49,22 @@ export interface StorageState {
   state: SavedStudioState;
 }
 
+// Detects browser quota errors without relying on `instanceof Error`. Browsers
+// throw a DOMException for localStorage quota failures, and DOMException is not
+// always a subclass of Error (notably in older WebKit), so check structurally.
 const isQuotaError = (error: unknown): boolean => {
-  if (!(error instanceof Error)) return false;
-  // Different browsers report quota errors differently
-  return (
-    error.name === 'QuotaExceededError' ||
-    error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-    /quota/i.test(error.message)
-  );
+  if (typeof error !== 'object' || error === null) return false;
+  const candidate = error as { name?: unknown; code?: unknown; message?: unknown };
+  if (typeof candidate.name === 'string' && QUOTA_ERROR_NAMES.has(candidate.name)) {
+    return true;
+  }
+  if (typeof candidate.code === 'number' && QUOTA_ERROR_CODES.has(candidate.code)) {
+    return true;
+  }
+  if (typeof candidate.message === 'string' && /quota/i.test(candidate.message)) {
+    return true;
+  }
+  return false;
 };
 
 const isLargeDataUrl = (value: unknown): value is string =>
@@ -43,11 +72,13 @@ const isLargeDataUrl = (value: unknown): value is string =>
   value.startsWith('data:') &&
   value.length > DATA_URL_PERSIST_THRESHOLD;
 
+// Replace image backgrounds carrying a stripped data URL with the default gradient,
+// so reload doesn't render an `<img>` with empty src.
 const stripLargeImage = (background: StudioBackground): StudioBackground => {
   if (background.type === 'image' && background.config) {
     const config = background.config as ImageConfig;
     if (isLargeDataUrl(config.url)) {
-      return { ...background, config: { ...config, url: '' } };
+      return fallbackGradientBackground;
     }
   }
   return background;
@@ -62,9 +93,10 @@ const stripHeavyAssets = (state: SavedStudioState): SavedStudioState => ({
     state.lastImageConfig && isLargeDataUrl(state.lastImageConfig.url)
       ? null
       : state.lastImageConfig,
-  logos: state.logos.map((logo) =>
-    isLargeDataUrl(logo.imageUrl) ? { ...logo, imageUrl: '' } : logo
-  ),
+  // Drop logos whose imageUrl can't be persisted entirely — keeping a record with
+  // no imageUrl would leave phantom thumbnails in BrandingControls and an unrenderable
+  // overlay (Logo bails when imageUrl is empty).
+  logos: state.logos.filter((logo) => !isLargeDataUrl(logo.imageUrl)),
   presets: state.presets.map((preset) => ({
     ...preset,
     background: stripLargeImage(preset.background),
