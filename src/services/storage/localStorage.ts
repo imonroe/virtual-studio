@@ -3,6 +3,10 @@ import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, Studio
 const STORAGE_KEY = 'virtual-studio-state';
 const STORAGE_VERSION = '1.0';
 
+// Data URLs (base64) can be megabytes each. localStorage typically caps at 5-10MB total,
+// so anything above this threshold is dropped on quota fallback to keep settings persisting.
+const DATA_URL_PERSIST_THRESHOLD = 200 * 1024;
+
 export interface SavedStudioState {
   background: StudioBackground;
   lowerThird: LowerThird | null;
@@ -24,32 +28,101 @@ export interface StorageState {
   state: SavedStudioState;
 }
 
+const isQuotaError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+  // Different browsers report quota errors differently
+  return (
+    error.name === 'QuotaExceededError' ||
+    error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+    /quota/i.test(error.message)
+  );
+};
+
+const isLargeDataUrl = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.startsWith('data:') &&
+  value.length > DATA_URL_PERSIST_THRESHOLD;
+
+const stripLargeImage = (background: StudioBackground): StudioBackground => {
+  if (background.type === 'image' && background.config) {
+    const config = background.config as ImageConfig;
+    if (isLargeDataUrl(config.url)) {
+      return { ...background, config: { ...config, url: '' } };
+    }
+  }
+  return background;
+};
+
+// Returns a state with large embedded data URLs (logos, image backgrounds) removed.
+// Settings are preserved; the user will need to re-upload heavy assets after reload.
+const stripHeavyAssets = (state: SavedStudioState): SavedStudioState => ({
+  ...state,
+  background: stripLargeImage(state.background),
+  lastImageConfig:
+    state.lastImageConfig && isLargeDataUrl(state.lastImageConfig.url)
+      ? null
+      : state.lastImageConfig,
+  logos: state.logos.map((logo) =>
+    isLargeDataUrl(logo.imageUrl) ? { ...logo, imageUrl: '' } : logo
+  ),
+  presets: state.presets.map((preset) => ({
+    ...preset,
+    background: stripLargeImage(preset.background),
+  })),
+});
+
+const buildStorageState = (state: SavedStudioState): StorageState => ({
+  version: STORAGE_VERSION,
+  timestamp: Date.now(),
+  state,
+});
+
+const writeToStorage = (state: SavedStudioState): void => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(buildStorageState(state)));
+};
+
 export const localStorageService = {
-  // Save state to localStorage
-  saveState: (state: { background: StudioBackground; lowerThird: LowerThird | null; ticker: Ticker | null; clock: Clock; liveIndicator: LiveIndicator; logos: LogoConfig[]; presets: StudioPreset[]; activePresetId: string | null; targetFPS: 60 | 30; quality: 'low' | 'medium' | 'high'; lastImageConfig: ImageConfig | null; keyboardShortcutsVisible: boolean }): void => {
+  // Save state to localStorage. On quota errors, retries with heavy assets stripped.
+  saveState: (state: SavedStudioState): void => {
+    const fullState: SavedStudioState = {
+      background: state.background,
+      lowerThird: state.lowerThird,
+      ticker: state.ticker,
+      clock: state.clock,
+      liveIndicator: state.liveIndicator,
+      logos: state.logos,
+      presets: state.presets,
+      activePresetId: state.activePresetId,
+      targetFPS: state.targetFPS,
+      quality: state.quality,
+      lastImageConfig: state.lastImageConfig,
+      keyboardShortcutsVisible: state.keyboardShortcutsVisible,
+    };
+
     try {
-      const storageState: StorageState = {
-        version: STORAGE_VERSION,
-        timestamp: Date.now(),
-        state: {
-          background: state.background,
-          lowerThird: state.lowerThird,
-          ticker: state.ticker,
-          clock: state.clock,
-          liveIndicator: state.liveIndicator,
-          logos: state.logos,
-          presets: state.presets,
-          activePresetId: state.activePresetId,
-          targetFPS: state.targetFPS,
-          quality: state.quality,
-          lastImageConfig: state.lastImageConfig,
-          keyboardShortcutsVisible: state.keyboardShortcutsVisible,
-        }
-      };
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storageState));
+      writeToStorage(fullState);
+      return;
     } catch (error) {
-      console.error('Failed to save state to localStorage:', error);
+      if (!isQuotaError(error)) {
+        console.error('Failed to save state to localStorage:', error);
+        return;
+      }
+    }
+
+    // Quota exceeded: try again without heavy embedded data URLs.
+    try {
+      writeToStorage(stripHeavyAssets(fullState));
+      console.warn(
+        '⚠️ localStorage quota exceeded. Saved settings without uploaded images/logos; re-upload after reload to restore them.'
+      );
+    } catch (error) {
+      if (isQuotaError(error)) {
+        console.warn(
+          '⚠️ localStorage quota still exceeded after stripping uploaded assets. Settings will not persist this session.'
+        );
+      } else {
+        console.error('Failed to save reduced state to localStorage:', error);
+      }
     }
   },
 
@@ -62,7 +135,7 @@ export const localStorageService = {
       }
 
       const storageState: StorageState = JSON.parse(stored);
-      
+
       // Check version compatibility
       if (storageState.version !== STORAGE_VERSION) {
         console.warn('⚠️ Stored state version mismatch, ignoring saved state');
@@ -109,7 +182,7 @@ export const localStorageService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return null;
-      
+
       const storageState: StorageState = JSON.parse(stored);
       return {
         version: storageState.version,
