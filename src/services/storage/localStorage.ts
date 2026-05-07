@@ -1,4 +1,5 @@
-import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, StudioPreset, ImageConfig, LogoConfig, GradientConfig } from '@/types/studio';
+import type { StudioBackground, LowerThird, Ticker, Clock, LiveIndicator, StudioPreset, ImageConfig, LogoConfig } from '@/types/studio';
+import { createDefaultBackground } from '@services/state/defaults';
 
 const STORAGE_KEY = 'virtual-studio-state';
 const STORAGE_VERSION = '1.0';
@@ -13,20 +14,6 @@ const QUOTA_ERROR_NAMES = new Set([
   'QuotaExceededError',
   'NS_ERROR_DOM_QUOTA_REACHED',
 ]);
-
-// Fallback gradient used when an image background must be dropped on quota failure.
-const fallbackGradientBackground: StudioBackground = {
-  id: 'default-bg',
-  type: 'gradient',
-  visible: true,
-  config: {
-    colors: ['#1a1a2e', '#16213e', '#0f3460'],
-    angle: 135,
-    type: 'linear',
-    animated: true,
-    animationSpeed: 0.5,
-  } as GradientConfig,
-};
 
 export interface SavedStudioState {
   background: StudioBackground;
@@ -72,13 +59,14 @@ const isLargeDataUrl = (value: unknown): value is string =>
   value.startsWith('data:') &&
   value.length > DATA_URL_PERSIST_THRESHOLD;
 
-// Replace image backgrounds carrying a stripped data URL with the default gradient,
-// so reload doesn't render an `<img>` with empty src.
+// Replace image backgrounds carrying a stripped data URL with a fresh default
+// gradient (factory call avoids sharing references across multiple stripped
+// backgrounds, which the in-place store updates would otherwise entangle).
 const stripLargeImage = (background: StudioBackground): StudioBackground => {
   if (background.type === 'image' && background.config) {
     const config = background.config as ImageConfig;
     if (isLargeDataUrl(config.url)) {
-      return fallbackGradientBackground;
+      return createDefaultBackground();
     }
   }
   return background;

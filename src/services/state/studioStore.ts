@@ -2,14 +2,14 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { localStorageService } from '@services/storage/localStorage';
-import type { 
-  StudioBackground, 
-  LowerThird, 
-  Ticker, 
-  Clock, 
+import { createDefaultBackground } from '@services/state/defaults';
+import type {
+  StudioBackground,
+  LowerThird,
+  Ticker,
+  Clock,
   LiveIndicator,
   StudioPreset,
-  GradientConfig,
   ImageConfig,
   LogoConfig,
   LogoPosition
@@ -79,21 +79,7 @@ interface StudioState {
   toggleLiveIndicator: () => void;
 }
 
-// Default gradient background
-const defaultGradientConfig: GradientConfig = {
-  colors: ['#1a1a2e', '#16213e', '#0f3460'],
-  angle: 135,
-  type: 'linear',
-  animated: true,
-  animationSpeed: 0.5
-};
-
-const defaultBackground: StudioBackground = {
-  id: 'default-bg',
-  type: 'gradient',
-  visible: true,
-  config: defaultGradientConfig
-};
+const defaultBackground: StudioBackground = createDefaultBackground();
 
 const defaultClock: Clock = {
   visible: false,
