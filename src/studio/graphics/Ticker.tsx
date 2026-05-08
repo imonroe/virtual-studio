@@ -13,8 +13,7 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
   const [itemWidth, setItemWidth] = useState(0);
 
   const tickerContent = config.content.join(' • ');
-  // Treat undefined as animated so older saved tickers without the field still scroll.
-  const isAnimated = config.animated !== false && config.content.length > 0;
+  const isAnimated = config.animated && config.content.length > 0;
 
   useLayoutEffect(() => {
     if (!itemRef.current) return;

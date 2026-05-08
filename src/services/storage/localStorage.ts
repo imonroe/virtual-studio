@@ -36,6 +36,23 @@ export interface StorageState {
   state: SavedStudioState;
 }
 
+// Older saved states predate the `animated` field on Ticker. Fill in defaults
+// at the persistence boundary so the rest of the app can treat `animated` as
+// strictly boolean (matching the Ticker type).
+const normalizeTicker = (ticker: Ticker | null | undefined): Ticker | null => {
+  if (!ticker) return null;
+  return ticker.animated === undefined ? { ...ticker, animated: true } : ticker;
+};
+
+const normalizeLoadedState = (state: SavedStudioState): SavedStudioState => ({
+  ...state,
+  ticker: normalizeTicker(state.ticker),
+  presets: state.presets.map((preset) => ({
+    ...preset,
+    ticker: preset.ticker ? normalizeTicker(preset.ticker) ?? undefined : undefined,
+  })),
+});
+
 // Detects browser quota errors without relying on `instanceof Error`. Browsers
 // throw a DOMException for localStorage quota failures, and DOMException is not
 // always a subclass of Error (notably in older WebKit), so check structurally.
@@ -169,7 +186,7 @@ export const localStorageService = {
         return null;
       }
 
-      return storageState.state;
+      return normalizeLoadedState(storageState.state);
     } catch (error) {
       console.error('Failed to load state from localStorage:', error);
       return null;
