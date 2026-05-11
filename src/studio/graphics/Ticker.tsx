@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Ticker as TickerType } from '@/types/studio';
 import './Ticker.css';
 
@@ -8,51 +8,34 @@ interface TickerProps {
 
 export const Ticker: React.FC<TickerProps> = ({ config }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const [scrollWidth, setScrollWidth] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const itemRef = useRef<HTMLSpanElement>(null);
+  const [itemWidth, setItemWidth] = useState(0);
 
-  // Combine all ticker content into a single scrolling string
   const tickerContent = config.content.join(' • ');
+  const isAnimated = config.animated && config.content.length > 0;
 
-  useEffect(() => {
-    if (textRef.current && containerRef.current) {
-      const newScrollWidth = textRef.current.scrollWidth;
-      const newContainerWidth = containerRef.current.offsetWidth;
-      setScrollWidth(newScrollWidth);
-      setContainerWidth(newContainerWidth);
+  useLayoutEffect(() => {
+    if (!itemRef.current) return;
+    const measure = () => {
+      if (itemRef.current) {
+        setItemWidth(itemRef.current.offsetWidth);
+      }
+    };
+    measure();
+
+    // Re-measure when fonts finish loading (offsetWidth before font swap is wrong)
+    if ('fonts' in document) {
+      document.fonts.ready.then(measure).catch(() => {});
     }
   }, [tickerContent, config.fontSize]);
 
   useEffect(() => {
-    // Update CSS variables for dynamic styling
-    if (containerRef.current) {
-      const element = containerRef.current;
-      element.style.setProperty('--bg-color', config.backgroundColor);
-      element.style.setProperty('--text-color', config.textColor);
-      element.style.setProperty('--font-size', `${config.fontSize}px`);
-      
-      // Calculate animation duration for seamless looping
-      // For seamless looping with pixel-based animation, the text needs to move
-      // from its starting position until the second copy appears in the first copy's place
-      const loopDistance = scrollWidth + 40; // text width + margin for seamless transition
-      const duration = loopDistance / config.speed;
-      const finalDuration = Math.max(duration, 2);
-      
-      // Set CSS custom properties for pixel-based animation
-      element.style.setProperty('--animation-duration', `${finalDuration}s`);
-      element.style.setProperty('--loop-distance', `-${loopDistance}px`);
-    }
-  }, [config, scrollWidth, containerWidth]);
-
-  // Handle resize
-  useEffect(() => {
     const handleResize = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
+      if (itemRef.current) {
+        setItemWidth(itemRef.current.offsetWidth);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -61,28 +44,36 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
     return null;
   }
 
+  // Track translates from 0 to -itemWidth (one full copy worth) so the second
+  // copy slides into the first copy's exact starting position — seamless loop.
+  const speed = Math.max(config.speed, 1);
+  const duration = itemWidth > 0 ? itemWidth / speed : 0;
+
+  const containerStyle: React.CSSProperties = {
+    background: config.backgroundColor,
+    color: config.textColor,
+    fontSize: `${config.fontSize}px`,
+  };
+
+  const trackStyle: React.CSSProperties = isAnimated && duration > 0
+    ? {
+        animationName: 'tickerScroll',
+        animationDuration: `${duration}s`,
+        animationTimingFunction: 'linear',
+        animationIterationCount: 'infinite',
+      }
+    : { animation: 'none', transform: 'translateX(0)' };
+
   return (
-    <div
-      ref={containerRef}
-      className="ticker-container"
-    >
+    <div ref={containerRef} className="ticker-container" style={containerStyle}>
       <div className="ticker-label">
         <span>BREAKING</span>
       </div>
       <div className="ticker-content">
-        <div
-          ref={textRef}
-          className="ticker-text"
-          style={{
-            animation: config.animated && config.content.length > 0
-              ? `tickerScroll var(--animation-duration, 30s) linear infinite`
-              : 'none'
-          }}
-        >
-          {/* Always duplicate content for seamless loop when animated */}
-          <span>{tickerContent}</span>
-          {config.animated && config.content.length > 0 && (
-            <span style={{ marginLeft: '40px' }}>{tickerContent}</span>
+        <div ref={trackRef} className="ticker-text" style={trackStyle}>
+          <span ref={itemRef} className="ticker-item">{tickerContent}</span>
+          {isAnimated && (
+            <span className="ticker-item" aria-hidden="true">{tickerContent}</span>
           )}
         </div>
       </div>

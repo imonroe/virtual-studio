@@ -7,22 +7,15 @@
   z-index: 15;
   display: flex;
   align-items: center;
-  background: var(--bg-color, rgba(0, 0, 0, 0.9));
-  color: var(--text-color, #ffffff);
-  font-size: var(--font-size, 14px);
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  font-size: 14px;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   border-top: 2px solid #ff0000;
   user-select: none;
   pointer-events: none;
   overflow: hidden;
-  
-  /* Default styling */
-  --bg-color: rgba(0, 0, 0, 0.9);
-  --text-color: #ffffff;
-  --font-size: 14px;
-  --scroll-speed: 50s;
-  --animation-duration: 30s;
 }
 
 .ticker-label {
@@ -71,19 +64,18 @@
   will-change: transform;
 }
 
-.ticker-text span {
+.ticker-item {
   display: inline-block;
   padding-right: 2em;
+  flex-shrink: 0;
 }
 
-/* Scrolling animation */
+/* Scrolling animation: the track contains two identical copies of the content,
+   so translating by -50% of the track width slides the second copy into the
+   first copy's exact starting position — restart from 0 is seamless. */
 @keyframes tickerScroll {
-  0% {
-    transform: translateX(100vw);
-  }
-  100% {
-    transform: translateX(var(--loop-distance, -100%));
-  }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* Pause animation on hover for better readability */
