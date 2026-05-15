@@ -27,18 +27,12 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
     // this effect re-runs and attaches the animation to the new track.
     if (!track || !item) return;
 
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
     const start = () => {
       if (animationRef.current) {
         animationRef.current.cancel();
         animationRef.current = null;
       }
-      if (!isAnimated || prefersReducedMotion) {
-        // Static render: text stays in place. Reduced-motion users still see
-        // the headlines, just without continuous scroll.
+      if (!isAnimated) {
         track.style.transform = 'translateX(0)';
         return;
       }
