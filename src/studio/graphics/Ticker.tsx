@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import type { Ticker as TickerType } from '@/types/studio';
 import './Ticker.css';
 
@@ -22,14 +22,23 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
   useLayoutEffect(() => {
     const track = trackRef.current;
     const item = itemRef.current;
+    // When config.visible flips false → true, React unmounts and remounts the
+    // inner DOM, giving us fresh refs. config.visible is in the dep list so
+    // this effect re-runs and attaches the animation to the new track.
     if (!track || !item) return;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
     const start = () => {
       if (animationRef.current) {
         animationRef.current.cancel();
         animationRef.current = null;
       }
-      if (!isAnimated) {
+      if (!isAnimated || prefersReducedMotion) {
+        // Static render: text stays in place. Reduced-motion users still see
+        // the headlines, just without continuous scroll.
         track.style.transform = 'translateX(0)';
         return;
       }
@@ -37,15 +46,13 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
       if (itemWidth === 0) return;
 
       const speed = Math.max(config.speed, 1);
-      const durationMs = (itemWidth / speed) * 1000;
-
       animationRef.current = track.animate(
         [
           { transform: 'translateX(0)' },
           { transform: `translateX(-${itemWidth}px)` },
         ],
         {
-          duration: durationMs,
+          duration: (itemWidth / speed) * 1000,
           iterations: Infinity,
           easing: 'linear',
         }
@@ -60,39 +67,19 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
       document.fonts.ready.then(start).catch(() => {});
     }
 
+    // ResizeObserver covers window resize, container reflow, and any other
+    // size change to the measured item in one path.
+    const ro = new ResizeObserver(start);
+    ro.observe(item);
+
     return () => {
+      ro.disconnect();
       if (animationRef.current) {
         animationRef.current.cancel();
         animationRef.current = null;
       }
     };
-  }, [isAnimated, tickerContent, config.fontSize, config.speed]);
-
-  useEffect(() => {
-    const onResize = () => {
-      const track = trackRef.current;
-      const item = itemRef.current;
-      if (!track || !item || !isAnimated) return;
-      const itemWidth = item.offsetWidth;
-      if (itemWidth === 0) return;
-
-      const speed = Math.max(config.speed, 1);
-      const durationMs = (itemWidth / speed) * 1000;
-
-      if (animationRef.current) {
-        animationRef.current.cancel();
-      }
-      animationRef.current = track.animate(
-        [
-          { transform: 'translateX(0)' },
-          { transform: `translateX(-${itemWidth}px)` },
-        ],
-        { duration: durationMs, iterations: Infinity, easing: 'linear' }
-      );
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [isAnimated, config.speed]);
+  }, [isAnimated, tickerContent, config.fontSize, config.speed, config.visible]);
 
   if (!config.visible || config.content.length === 0) {
     return null;
