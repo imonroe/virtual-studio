@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import type { Ticker as TickerType } from '@/types/studio';
 import './Ticker.css';
 
@@ -10,44 +10,93 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const itemRef = useRef<HTMLSpanElement>(null);
-  const [itemWidth, setItemWidth] = useState(0);
+  const animationRef = useRef<Animation | null>(null);
 
   const tickerContent = config.content.join(' • ');
   const isAnimated = config.animated && config.content.length > 0;
 
+  // Drive the scroll with the Web Animations API directly. CSS keyframe +
+  // inline-style approaches were unreliable here — element.animate() pins the
+  // keyframes to the element at known pixel offsets and doesn't depend on CSS
+  // custom properties, percentage transforms, or React style diffing.
   useLayoutEffect(() => {
-    if (!itemRef.current) return;
-    const measure = () => {
-      if (itemRef.current) {
-        setItemWidth(itemRef.current.offsetWidth);
+    const track = trackRef.current;
+    const item = itemRef.current;
+    if (!track || !item) return;
+
+    const start = () => {
+      if (animationRef.current) {
+        animationRef.current.cancel();
+        animationRef.current = null;
+      }
+      if (!isAnimated) {
+        track.style.transform = 'translateX(0)';
+        return;
+      }
+      const itemWidth = item.offsetWidth;
+      if (itemWidth === 0) return;
+
+      const speed = Math.max(config.speed, 1);
+      const durationMs = (itemWidth / speed) * 1000;
+
+      animationRef.current = track.animate(
+        [
+          { transform: 'translateX(0)' },
+          { transform: `translateX(-${itemWidth}px)` },
+        ],
+        {
+          duration: durationMs,
+          iterations: Infinity,
+          easing: 'linear',
+        }
+      );
+    };
+
+    start();
+
+    // Re-measure once fonts have actually loaded — offsetWidth before font
+    // swap returns a fallback-font width that throws off the loop distance.
+    if ('fonts' in document) {
+      document.fonts.ready.then(start).catch(() => {});
+    }
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.cancel();
+        animationRef.current = null;
       }
     };
-    measure();
-
-    // Re-measure when fonts finish loading (offsetWidth before font swap is wrong)
-    if ('fonts' in document) {
-      document.fonts.ready.then(measure).catch(() => {});
-    }
-  }, [tickerContent, config.fontSize]);
+  }, [isAnimated, tickerContent, config.fontSize, config.speed]);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (itemRef.current) {
-        setItemWidth(itemRef.current.offsetWidth);
+    const onResize = () => {
+      const track = trackRef.current;
+      const item = itemRef.current;
+      if (!track || !item || !isAnimated) return;
+      const itemWidth = item.offsetWidth;
+      if (itemWidth === 0) return;
+
+      const speed = Math.max(config.speed, 1);
+      const durationMs = (itemWidth / speed) * 1000;
+
+      if (animationRef.current) {
+        animationRef.current.cancel();
       }
+      animationRef.current = track.animate(
+        [
+          { transform: 'translateX(0)' },
+          { transform: `translateX(-${itemWidth}px)` },
+        ],
+        { duration: durationMs, iterations: Infinity, easing: 'linear' }
+      );
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [isAnimated, config.speed]);
 
   if (!config.visible || config.content.length === 0) {
     return null;
   }
-
-  // Track translates from 0 to -itemWidth (one full copy worth) so the second
-  // copy slides into the first copy's exact starting position — seamless loop.
-  const speed = Math.max(config.speed, 1);
-  const duration = itemWidth > 0 ? itemWidth / speed : 0;
 
   const containerStyle: React.CSSProperties = {
     background: config.backgroundColor,
@@ -55,22 +104,13 @@ export const Ticker: React.FC<TickerProps> = ({ config }) => {
     fontSize: `${config.fontSize}px`,
   };
 
-  const trackStyle: React.CSSProperties = isAnimated && duration > 0
-    ? {
-        animationName: 'tickerScroll',
-        animationDuration: `${duration}s`,
-        animationTimingFunction: 'linear',
-        animationIterationCount: 'infinite',
-      }
-    : { animation: 'none', transform: 'translateX(0)' };
-
   return (
     <div ref={containerRef} className="ticker-container" style={containerStyle}>
       <div className="ticker-label">
         <span>BREAKING</span>
       </div>
       <div className="ticker-content">
-        <div ref={trackRef} className="ticker-text" style={trackStyle}>
+        <div ref={trackRef} className="ticker-text">
           <span ref={itemRef} className="ticker-item">{tickerContent}</span>
           {isAnimated && (
             <span className="ticker-item" aria-hidden="true">{tickerContent}</span>
